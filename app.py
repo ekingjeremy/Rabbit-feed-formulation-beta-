@@ -98,10 +98,18 @@ Wheat Bran,15,1800,10,0.1,90
 Groundnut Cake,45,3000,6,0.25,130
 """)
 
-with open(f"{enhanced_path}/requirements.txt", "w") as f:
-    f.write("streamlit\npulp\nplotly\npandas")
+import os
+import zipfile
 
-# Zip it
+# Define the path correctly before using it
+enhanced_path = "/mnt/data/rabbit_feed_app_enhanced"  # Correct path definition
+os.makedirs(enhanced_path, exist_ok=True)
+
+# Now proceed with the rest of the code
+with open(f"{enhanced_path}/app.py", "w") as f:
+    f.write(enhanced_app_py.strip())
+
+# Create your ZIP file
 zip_path = "/mnt/data/rabbit_feed_app_enhanced.zip"
 with zipfile.ZipFile(zip_path, 'w') as zipf:
     for folder, _, files in os.walk(enhanced_path):

@@ -57,13 +57,21 @@ with tab1:
 # Edit Ingredients Tab
 with tab2:
     st.subheader("✍️ Modify Ingredients Table")
-    edited_df = st.data_editor(df.reset_index(), num_rows="dynamic", use_container_width=True)
+    editable_df = df.reset_index().rename(columns={"index": "Ingredient"})
+    edited_df = st.data_editor(editable_df, num_rows="dynamic", use_container_width=True)
+
     if st.button("💾 Save Changes"):
-        if "Ingredient" in edited_df.columns and edited_df["Ingredient"].isnull().sum() == 0:
+        if "Ingredient" in edited_df.columns and edited_df["Ingredient"].notna().all() and edited_df["Ingredient"].is_unique:
+            edited_df = edited_df.dropna(subset=["Ingredient"])
             st.session_state.ingredient_data = edited_df.set_index("Ingredient")
-            st.success("Ingredient list updated successfully! You can now rerun the optimizer.")
+            st.success("Ingredient list updated successfully!")
         else:
-            st.error("❌ 'Ingredient' column is missing or has empty values. Please fix this before saving.")
+            st.error("❌ Please make sure all ingredients are uniquely named and not empty.")
+
+    if LpStatus[model.status] == "Optimal" and st.button("🧹 Remove unused ingredients"):
+        used = [i for i in df.index if vars[i].varValue > 0]
+        st.session_state.ingredient_data = df.loc[used]
+        st.success("Unused ingredients removed.")
 
 # Performance Predictor Tab
 with tab3:
@@ -78,4 +86,3 @@ with tab3:
         st.info("This is a simulated estimate. For real predictions, train a model on rabbit growth data.")
     else:
         st.warning("⚠️ Prediction unavailable. Run a successful optimization first.")
-

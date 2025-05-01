@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-import os
-import zipfile
 from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
 import plotly.express as px
 
@@ -59,23 +57,24 @@ with tab1:
 # Edit Ingredients Tab
 with tab2:
     st.subheader("✍️ Modify Ingredients Table")
-    edited_df = st.data_editor(df.reset_index(), num_rows="dynamic")
+    edited_df = st.data_editor(df.reset_index(), num_rows="dynamic", use_container_width=True)
     if st.button("💾 Save Changes"):
-        st.session_state.ingredient_data = edited_df.set_index("Ingredient")
-        st.success("Ingredient list updated successfully!")
+        if "Ingredient" in edited_df.columns and edited_df["Ingredient"].isnull().sum() == 0:
+            st.session_state.ingredient_data = edited_df.set_index("Ingredient")
+            st.success("Ingredient list updated successfully! You can now rerun the optimizer.")
+        else:
+            st.error("❌ 'Ingredient' column is missing or has empty values. Please fix this before saving.")
 
 # Performance Predictor Tab
 with tab3:
     st.subheader("🚀 Performance Predictor (Mock-up)")
 
-    # Simulate predicted performance based on nutrients
     if LpStatus[model.status] == "Optimal":
         protein = lpSum([vars[i].varValue * df.loc[i, "CP"] for i in df.index])
         energy_val = lpSum([vars[i].varValue * df.loc[i, "Energy"] for i in df.index])
-        gain = 10 + 0.015 * protein.value() + 0.002 * energy_val.value()  # dummy logic
+        gain = 10 + 0.015 * protein.value() + 0.002 * energy_val.value()  # simulated logic
 
         st.metric("📈 Expected Weight Gain", f"{gain:.1f} g/day")
         st.info("This is a simulated estimate. For real predictions, train a model on rabbit growth data.")
-
     else:
         st.warning("⚠️ Prediction unavailable. Run a successful optimization first.")

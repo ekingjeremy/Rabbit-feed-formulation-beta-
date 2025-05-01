@@ -1,7 +1,3 @@
-# Add ingredient editing and performance prediction (ML placeholder) features to the Streamlit app
-
-# New app.py content
-enhanced_app_py = """
 import streamlit as st
 import pandas as pd
 import os
@@ -12,11 +8,8 @@ import plotly.express as px
 st.title("🐰 Rabbit Feed Formulation Optimizer + Editor + Predictor")
 
 # Load ingredient data or create default
-file_path = "ingredients.csv"
-if os.path.exists(file_path):
-    df = pd.read_csv(file_path).set_index("Ingredient")
-else:
-    df = pd.DataFrame({
+if "ingredient_data" not in st.session_state:
+    st.session_state.ingredient_data = pd.DataFrame({
         "CP": [18, 9, 44, 15, 45],
         "Energy": [2300, 3400, 3200, 1800, 3000],
         "Fibre": [25, 2, 7, 10, 6],
@@ -24,9 +17,12 @@ else:
         "Cost": [80, 120, 150, 90, 130]
     }, index=["Alfalfa", "Maize", "Soybean Meal", "Wheat Bran", "Groundnut Cake"])
 
+df = st.session_state.ingredient_data
+
 # Tabs
 tab1, tab2, tab3 = st.tabs(["🧪 Optimizer", "📝 Edit Ingredients", "📈 Performance Predictor"])
 
+# Optimizer Tab
 with tab1:
     st.sidebar.header("Nutrient Requirements (per kg feed)")
     cp = st.sidebar.slider("Crude Protein (%)", 10, 25, 16)
@@ -60,13 +56,15 @@ with tab1:
     else:
         st.error("⚠️ No feasible solution found with current nutrient settings.")
 
+# Edit Ingredients Tab
 with tab2:
     st.subheader("✍️ Modify Ingredients Table")
     edited_df = st.data_editor(df.reset_index(), num_rows="dynamic")
     if st.button("💾 Save Changes"):
-        edited_df.set_index("Ingredient").to_csv(file_path)
-        st.success("Ingredient list updated successfully! Please reload the app.")
+        st.session_state.ingredient_data = edited_df.set_index("Ingredient")
+        st.success("Ingredient list updated successfully!")
 
+# Performance Predictor Tab
 with tab3:
     st.subheader("🚀 Performance Predictor (Mock-up)")
 
@@ -81,39 +79,3 @@ with tab3:
 
     else:
         st.warning("⚠️ Prediction unavailable. Run a successful optimization first.")
-"""
-
-# Save this enhanced app.py
-enhanced_path = "/mnt/data/rabbit_feed_app_enhanced"
-os.makedirs(enhanced_path, exist_ok=True)
-
-with open(f"{enhanced_path}/app.py", "w") as f:
-    f.write(enhanced_app_py.strip())
-
-with open(f"{enhanced_path}/ingredients.csv", "w") as f:
-    f.write("""Ingredient,CP,Energy,Fibre,Calcium,Cost
-Alfalfa,18,2300,25,1.5,80
-Maize,9,3400,2,0.02,120
-Soybean Meal,44,3200,7,0.3,150
-Wheat Bran,15,1800,10,0.1,90
-Groundnut Cake,45,3000,6,0.25,130
-""")
-
-
-# Define the path correctly before using it
-enhanced_path = "/mnt/data/rabbit_feed_app_enhanced"  # Correct path definition
-os.makedirs(enhanced_path, exist_ok=True)
-
-# Now proceed with the rest of the code
-with open(f"{enhanced_path}/app.py", "w") as f:
-    f.write(enhanced_app_py.strip())
-
-# Create your ZIP file
-zip_path = "/mnt/data/rabbit_feed_app_enhanced.zip"
-with zipfile.ZipFile(zip_path, 'w') as zipf:
-    for folder, _, files in os.walk(enhanced_path):
-        for file in files:
-            file_path = os.path.join(folder, file)
-            zipf.write(file_path, os.path.relpath(file_path, enhanced_path))
-
-zip_path

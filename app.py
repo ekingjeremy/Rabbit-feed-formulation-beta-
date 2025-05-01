@@ -78,3 +78,4 @@ with tab3:
         st.info("This is a simulated estimate. For real predictions, train a model on rabbit growth data.")
     else:
         st.warning("⚠️ Prediction unavailable. Run a successful optimization first.")
+

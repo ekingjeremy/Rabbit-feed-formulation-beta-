@@ -5,6 +5,7 @@ enhanced_app_py = """
 import streamlit as st
 import pandas as pd
 import os
+import zipfile
 from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
 import plotly.express as px
 
@@ -98,8 +99,6 @@ Wheat Bran,15,1800,10,0.1,90
 Groundnut Cake,45,3000,6,0.25,130
 """)
 
-import os
-import zipfile
 
 # Define the path correctly before using it
 enhanced_path = "/mnt/data/rabbit_feed_app_enhanced"  # Correct path definition

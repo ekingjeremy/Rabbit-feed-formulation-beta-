@@ -1,41 +1,40 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import pickle
 from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
 import plotly.express as px
-import pickle
-from sklearn.ensemble import RandomForestRegressor
 
-st.set_page_config(page_title="Rabbit Feed Optimizer", layout="wide")
-st.title("🐰 Rabbit Feed Formulation & Performance Predictor")
+st.title("🐰 Rabbit Feed Formulation Optimizer + Editor + Predictor")
 
-# Load default ingredient data (both concentrates and fodders)
+# Load ingredient data or create default
 if "ingredient_data" not in st.session_state:
     st.session_state.ingredient_data = pd.DataFrame({
-        "CP": [18, 9, 44, 15, 45, 12, 8],
-        "Energy": [2300, 3400, 3200, 1800, 3000, 2200, 2100],
-        "Fibre": [25, 2, 7, 10, 6, 28, 32],
-        "Calcium": [1.5, 0.02, 0.3, 0.1, 0.25, 1.8, 2.2],
-        "Cost": [80, 120, 150, 90, 130, 70, 60],
-        "Type": ["Fodder", "Concentrate", "Concentrate", "Concentrate", "Concentrate", "Fodder", "Fodder"]
-    }, index=["Alfalfa", "Maize", "Soybean Meal", "Wheat Bran", "Groundnut Cake", "Napier Grass", "Guinea Grass"])
+        "CP": [18, 9, 44, 15, 45, 12, 10],
+        "Energy": [2300, 3400, 3200, 1800, 3000, 1900, 1600],
+        "Fibre": [25, 2, 7, 10, 6, 30, 35],
+        "Calcium": [1.5, 0.02, 0.3, 0.1, 0.25, 0.6, 0.4],
+        "Cost": [80, 120, 150, 90, 130, 50, 40]
+    }, index=[
+        "Alfalfa", "Maize", "Soybean Meal", "Wheat Bran", "Groundnut Cake", "Elephant Grass", "Sweet Potato Vines"
+    ])
 
 df = st.session_state.ingredient_data
 
 # Tabs
-tab1, tab2, tab3 = st.tabs(["🧪 Optimizer", "📝 Edit Ingredients", "📈 AI Predictor"])
+tab1, tab2, tab3 = st.tabs(["🧪 Optimizer", "📝 Edit Ingredients", "📈 Performance Predictor"])
 
-# ------------------ OPTIMIZER ------------------
+# Optimizer Tab
 with tab1:
     st.sidebar.header("Nutrient Requirements (per kg feed)")
     cp = st.sidebar.slider("Crude Protein (%)", 10, 25, 16)
     energy = st.sidebar.slider("Energy (Kcal/kg)", 1800, 3500, 2500)
     fibre = st.sidebar.slider("Fibre (%)", 5, 30, 10)
-    calcium = st.sidebar.slider("Calcium (%)", 0.1, 2.0, 0.8)
+    calcium = st.sidebar.slider("Calcium (%)", 0.1, 1.5, 0.5)
 
+    # LP Model
     model = LpProblem("Rabbit_Feed_Optimization", LpMinimize)
     vars = {i: LpVariable(i, lowBound=0) for i in df.index}
-
     model += lpSum([vars[i] * df.loc[i, 'Cost'] for i in df.index])
     model += lpSum([vars[i] * df.loc[i, 'CP'] for i in df.index]) >= cp
     model += lpSum([vars[i] * df.loc[i, 'Energy'] for i in df.index]) >= energy
@@ -53,12 +52,13 @@ with tab1:
         st.dataframe(result_df)
         st.write(f"**Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
 
+        # Pie chart
         fig = px.pie(result_df, values='Proportion (kg)', names=result_df.index, title='Feed Ingredient Distribution')
         st.plotly_chart(fig)
     else:
         st.error("⚠️ No feasible solution found with current nutrient settings.")
 
-# ------------------ EDIT INGREDIENTS ------------------
+# Edit Ingredients Tab
 with tab2:
     st.subheader("✍️ Modify Ingredients Table")
     editable_df = df.reset_index().rename(columns={"index": "Ingredient"})
@@ -70,29 +70,36 @@ with tab2:
             st.session_state.ingredient_data = edited_df.set_index("Ingredient")
             st.success("Ingredient list updated successfully!")
         else:
-            st.error("❌ Please ensure all ingredients have unique names and no missing values.")
+            st.error("❌ Please make sure all ingredients are uniquely named and not empty.")
 
     if LpStatus[model.status] == "Optimal" and st.button("🧹 Remove unused ingredients"):
         used = [i for i in df.index if vars[i].varValue > 0]
         st.session_state.ingredient_data = df.loc[used]
         st.success("Unused ingredients removed.")
 
-# ------------------ AI PREDICTOR ------------------
+# Performance Predictor Tab
 with tab3:
-    st.subheader("🧠 AI Weight Gain Predictor")
+    st.subheader("🚀 Performance Predictor")
 
-    try:
-        with open("model.pkl", "rb") as f:
-            model_rf = pickle.load(f)
-        
-        # Extract values
-        protein = sum(vars[i].varValue * df.loc[i, "CP"] for i in df.index)
-        energy_val = sum(vars[i].varValue * df.loc[i, "Energy"] for i in df.index)
-        fibre_val = sum(vars[i].varValue * df.loc[i, "Fibre"] for i in df.index)
+    if LpStatus[model.status] == "Optimal":
+        # Prepare model input
+        protein = lpSum([vars[i].varValue * df.loc[i, "CP"] for i in df.index]).value()
+        energy_val = lpSum([vars[i].varValue * df.loc[i, "Energy"] for i in df.index]).value()
+        fibre_val = lpSum([vars[i].varValue * df.loc[i, "Fibre"] for i in df.index]).value()
+        calcium_val = lpSum([vars[i].varValue * df.loc[i, "Calcium"] for i in df.index]).value()
 
-        input_features = pd.DataFrame([[protein, energy_val, fibre_val]], columns=["CP", "Energy", "Fibre"])
-        predicted_gain = model_rf.predict(input_features)[0]
-        
-        st.metric("📈 Predicted Daily Weight Gain", f"{predicted_gain:.1f} g/day")
-    except FileNotFoundError:
-        st.warning("⚠️ AI model not found. Train a model and save it as 'model.pkl' to enable predictions.")
+        X_input = pd.DataFrame([[protein, energy_val, fibre_val, calcium_val]],
+                               columns=["CP", "Energy", "Fibre", "Calcium"])
+
+        try:
+            with open("model.pkl", "rb") as f:
+                model_rf = pickle.load(f)
+                predicted_gain = model_rf.predict(X_input)[0]
+                st.metric("📈 Predicted Weight Gain", f"{predicted_gain:.1f} g/day")
+        except Exception as e:
+            st.warning("⚠️ Could not load model. Showing simulated prediction instead.")
+            gain = 10 + 0.015 * protein + 0.002 * energy_val
+            st.metric("📈 Simulated Weight Gain", f"{gain:.1f} g/day")
+            st.info("This is a simulated estimate. For real predictions, train and upload a model.")
+    else:
+        st.warning("⚠️ Prediction unavailable. Run a successful optimization first.")

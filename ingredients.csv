@@ -1,6 +1,14 @@
 Ingredient,CP,Energy,Fibre,Calcium,Cost
-Alfalfa,18,2300,25,1.5,80
-Maize,9,3400,2,0.02,120
-Soybean Meal,44,3200,7,0.3,150
-Wheat Bran,15,1800,10,0.1,90
-Groundnut Cake,45,3000,6,0.25,130
+ # Concentrates
+        ["Maize", "Concentrate", 9, 3400, 2, 0.02, 120],
+        ["Soybean Meal", "Concentrate", 44, 3200, 7, 0.3, 150],
+        ["Groundnut Cake", "Concentrate", 45, 3000, 6, 0.25, 130],
+        ["Wheat Bran", "Concentrate", 15, 1800, 10, 0.1, 90],
+        ["Fish Meal", "Concentrate", 60, 2900, 1, 5.0, 300],
+
+        # Fodders
+        ["Alfalfa", "Fodder", 18, 2300, 25, 1.5, 80],
+        ["Elephant Grass", "Fodder", 8, 2100, 32, 0.6, 60],
+        ["Sweet Potato Vine", "Fodder", 14, 2000, 20, 0.8, 55],
+        ["Moringa Leaves", "Fodder", 27, 2600, 17, 2.0, 90],
+        ["Pumpkin Leaves", "Fodder", 13, 1800, 15, 1.0, 70],

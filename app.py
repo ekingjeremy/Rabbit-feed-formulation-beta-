@@ -1,114 +1,114 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
 from sklearn.linear_model import LinearRegression
 import plotly.express as px
 
 st.set_page_config(page_title="Rabbit Feed Optimizer", layout="wide")
-st.title("🐰 Rabbit Feed Formulation Optimizer + Editor + Predictor")
+st.title("🐰 Rabbit Feed Formulation App")
 
-# ---------- DEFAULT INGREDIENT DATA ----------
-def default_ingredients():
-    return pd.DataFrame({
-        "Category": [
-            "Fodder", "Fodder", "Fodder", "Fodder", "Fodder", "Fodder", "Fodder",
-            "Concentrate", "Concentrate", "Concentrate", "Concentrate", "Concentrate"
-        ],
-        "CP": [12, 15, 9, 8, 13, 10, 14, 9, 44, 45, 15, 20],
-        "Energy": [1800, 2000, 1900, 1700, 1850, 1750, 1950, 3400, 3200, 3000, 1800, 2500],
-        "Fibre": [28, 25, 30, 35, 22, 32, 20, 2, 7, 6, 10, 5],
-        "Calcium": [0.6, 1.2, 0.8, 0.5, 1.1, 0.7, 0.9, 0.02, 0.3, 0.25, 0.1, 0.2],
-        "Cost": [40, 50, 45, 38, 55, 42, 48, 120, 150, 130, 90, 110]
-    }, index=[
-        "Elephant Grass", "Guinea Grass", "Sorghum Stover", "Maize Stover", "Sweet Potato Vines",
-        "Groundnut Haulms", "Stylosanthes", "Maize", "Soybean Meal", "Groundnut Cake", "Wheat Bran", "Palm Kernel Cake"
-    ])
-
+# Sample dataset with concentrate and fodder
 if "ingredient_data" not in st.session_state:
-    st.session_state.ingredient_data = default_ingredients()
+    st.session_state.ingredient_data = pd.DataFrame({
+        "Ingredient": [
+            "Maize", "Soybean Meal", "Groundnut Cake", "Wheat Offal", "Fish Meal",
+            "Alfalfa", "Elephant Grass", "Guinea Grass", "Stylosanthes", "Leucaena"
+        ],
+        "Category": [
+            "Concentrate", "Concentrate", "Concentrate", "Concentrate", "Concentrate",
+            "Fodder", "Fodder", "Fodder", "Fodder", "Fodder"
+        ],
+        "CP": [9, 44, 45, 15, 60, 18, 12, 10, 20, 25],
+        "Energy": [3400, 3200, 3000, 1800, 2800, 2300, 2200, 2000, 2100, 2300],
+        "Fibre": [2, 7, 6, 10, 1, 25, 28, 30, 18, 20],
+        "Calcium": [0.02, 0.3, 0.25, 0.1, 5, 1.5, 1.2, 1.3, 1.0, 1.1],
+        "Cost": [120, 150, 130, 90, 250, 80, 60, 50, 70, 65]
+    })
 
 df = st.session_state.ingredient_data
 
-# ---------- SIDEBAR: RATION TYPE AND NUTRIENTS ----------
-st.sidebar.header("⚙️ Settings")
-ration_type = st.sidebar.selectbox("Select Ration Type", ["Mixed", "Fodder only", "Concentrate only"])
-cp = st.sidebar.slider("Crude Protein (%)", 10, 25, 16)
-energy = st.sidebar.slider("Energy (Kcal/kg)", 1800, 3500, 2500)
-fibre = st.sidebar.slider("Fibre (%)", 5, 30, 10)
-calcium = st.sidebar.slider("Calcium (%)", 0.1, 1.5, 0.5)
+# Layout
+optimizer_col, editor_col, predictor_col = st.columns([1, 1, 1])
 
-# ---------- FILTER INGREDIENTS ----------
-if ration_type == "Fodder only":
-    df = df[df["Category"] == "Fodder"]
-elif ration_type == "Concentrate only":
-    df = df[df["Category"] == "Concentrate"]
+with optimizer_col:
+    st.header("🧪 Optimizer")
 
-# ---------- OPTIMIZER ----------
-with st.expander("🧪 Feed Optimizer", expanded=True):
+    ration_type = st.selectbox("Select Ration Type", ["Mixed", "Concentrate only", "Fodder only"])
+
+    st.markdown("### Nutrient Requirements (per kg feed)")
+    cp = st.slider("Crude Protein (%)", 10, 25, 16)
+    energy = st.slider("Energy (Kcal/kg)", 1800, 3500, 2500)
+    fibre = st.slider("Fibre (%)", 5, 30, 10)
+    calcium = st.slider("Calcium (%)", 0.1, 2.0, 0.5)
+
+    # Filter ingredients
+    if ration_type == "Concentrate only":
+        df_filtered = df[df["Category"] == "Concentrate"]
+    elif ration_type == "Fodder only":
+        df_filtered = df[df["Category"] == "Fodder"]
+    else:
+        df_filtered = df
+
+    # LP Model
     model = LpProblem("Rabbit_Feed_Optimization", LpMinimize)
-    vars = {i: LpVariable(i, lowBound=0) for i in df.index}
-    model += lpSum([vars[i] * df.loc[i, 'Cost'] for i in df.index])
-    model += lpSum([vars[i] * df.loc[i, 'CP'] for i in df.index]) >= cp
-    model += lpSum([vars[i] * df.loc[i, 'Energy'] for i in df.index]) >= energy
-    model += lpSum([vars[i] * df.loc[i, 'Fibre'] for i in df.index]) >= fibre
-    model += lpSum([vars[i] * df.loc[i, 'Calcium'] for i in df.index]) >= calcium
-    model += lpSum([vars[i] for i in df.index]) == 1
+    vars = {i: LpVariable(i, lowBound=0) for i in df_filtered["Ingredient"]}
+    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'Cost'].values[0] for i in vars])
+    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'CP'].values[0] for i in vars]) >= cp
+    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'Energy'].values[0] for i in vars]) >= energy
+    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'Fibre'].values[0] for i in vars]) >= fibre
+    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'Calcium'].values[0] for i in vars]) >= calcium
+    model += lpSum([vars[i] for i in vars]) == 1
 
     model.solve()
 
     if LpStatus[model.status] == "Optimal":
-        results = {i: vars[i].varValue for i in df.index if vars[i].varValue > 0}
+        st.success("✅ Optimal ration found!")
+        results = {i: vars[i].varValue for i in vars if vars[i].varValue > 0}
         result_df = pd.DataFrame.from_dict(results, orient='index', columns=['Proportion (kg)'])
-        result_df["Cost (₦)"] = result_df["Proportion (kg)"] * df.loc[result_df.index, 'Cost']
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.subheader("📊 Optimized Ration")
-            st.dataframe(result_df)
-            st.markdown(f"**Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
-        with col2:
-            fig = px.pie(result_df, values='Proportion (kg)', names=result_df.index, title='Feed Ingredient Distribution')
-            st.plotly_chart(fig)
+        result_df["Cost (₦)"] = result_df["Proportion (kg)"] * df_filtered.set_index("Ingredient").loc[result_df.index, 'Cost']
+        st.dataframe(result_df)
+        st.write(f"**Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
     else:
-        st.error("⚠️ No feasible solution found with current nutrient settings.")
+        st.error("⚠️ No feasible solution found with current settings.")
 
-# ---------- INGREDIENT EDITOR ----------
-with st.expander("📝 Ingredient Editor", expanded=False):
-    st.markdown("### Edit Ingredients")
-    editable_df = df.reset_index().rename(columns={"index": "Ingredient"})
+with editor_col:
+    st.header("📝 Ingredient Editor")
+
+    editable_df = df.reset_index(drop=True)
     edited_df = st.data_editor(editable_df, num_rows="dynamic", use_container_width=True)
 
-    st.markdown("### Upload CSV with Ingredients")
-    uploaded_file = st.file_uploader("Upload CSV file with columns: Ingredient, Category, CP, Energy, Fibre, Calcium, Cost")
-    if uploaded_file:
-        upload_df = pd.read_csv(uploaded_file)
-        if all(col in upload_df.columns for col in ["Ingredient", "Category", "CP", "Energy", "Fibre", "Calcium", "Cost"]):
-            upload_df = upload_df.set_index("Ingredient")
-            st.session_state.ingredient_data = pd.concat([st.session_state.ingredient_data, upload_df])
-            st.success("Ingredients uploaded and added successfully!")
-        else:
-            st.error("❌ CSV missing required columns.")
-
-    if st.button("💾 Save Changes"):
+    if st.button("💾 Save Ingredients"):
         if "Ingredient" in edited_df.columns and edited_df["Ingredient"].notna().all() and edited_df["Ingredient"].is_unique:
-            st.session_state.ingredient_data = edited_df.set_index("Ingredient")
-            st.success("Ingredient list updated successfully!")
+            st.session_state.ingredient_data = edited_df
+            st.success("Ingredients updated successfully.")
         else:
-            st.error("❌ Please make sure all ingredients are uniquely named and not empty.")
+            st.error("Each ingredient must have a unique and non-empty name.")
 
-# ---------- PERFORMANCE PREDICTOR ----------
-with st.expander("📈 Performance Predictor", expanded=False):
-    st.subheader("🚀 AI-Based Weight Gain Estimation")
+    uploaded_file = st.file_uploader("Upload New Ingredients (CSV)", type="csv")
+    if uploaded_file:
+        try:
+            new_data = pd.read_csv(uploaded_file)
+            if set(["Ingredient", "Category", "CP", "Energy", "Fibre", "Calcium", "Cost"]).issubset(new_data.columns):
+                st.session_state.ingredient_data = pd.concat([df, new_data], ignore_index=True).drop_duplicates("Ingredient")
+                st.success("New ingredients uploaded successfully!")
+            else:
+                st.error("CSV must contain columns: Ingredient, Category, CP, Energy, Fibre, Calcium, Cost")
+        except Exception as e:
+            st.error(f"Error reading file: {e}")
 
+with predictor_col:
+    st.header("📈 Performance Predictor")
     if LpStatus[model.status] == "Optimal":
-        protein = sum([vars[i].varValue * df.loc[i, "CP"] for i in df.index])
-        energy_val = sum([vars[i].varValue * df.loc[i, "Energy"] for i in df.index])
+        protein_val = lpSum([vars[i].varValue * df_filtered.set_index("Ingredient").loc[i, "CP"] for i in vars]).value()
+        energy_val = lpSum([vars[i].varValue * df_filtered.set_index("Ingredient").loc[i, "Energy"] for i in vars]).value()
 
-        # Dummy AI model - Replace with trained model
-        gain = 10 + 0.015 * protein + 0.002 * energy_val
+        # Dummy model (replace with trained model for production)
+        X_train = pd.DataFrame({"CP": [16, 18, 20], "Energy": [2400, 2600, 2800]})
+        y_train = [20, 25, 30]
+        model_lr = LinearRegression().fit(X_train, y_train)
+        gain = model_lr.predict([[protein_val, energy_val]])[0]
 
-        st.metric("📈 Expected Weight Gain", f"{gain:.1f} g/day")
-        st.info("This is a simulated estimate. Replace with a trained ML model for better accuracy.")
+        st.metric("📊 Predicted Weight Gain", f"{gain:.2f} g/day")
+        st.caption("This is an estimate. Train with real data for accurate results.")
     else:
-        st.warning("⚠️ Prediction unavailable. Run a successful optimization first.")
+        st.info("Run the optimizer to see predictions.")

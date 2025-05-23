@@ -1,4 +1,6 @@
 streamlit
-pulp
-plotly
 pandas
+numpy
+plotly
+pulp
+scikit-learn

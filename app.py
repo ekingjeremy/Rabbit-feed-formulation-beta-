@@ -2,113 +2,109 @@ import streamlit as st
 import pandas as pd
 from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
 from sklearn.linear_model import LinearRegression
-import plotly.express as px
+import numpy as np
 
-st.set_page_config(page_title="Rabbit Feed Optimizer", layout="wide")
+st.set_page_config(layout="wide")
 st.title("🐰 Rabbit Feed Formulation App")
 
-# Sample dataset with concentrate and fodder
+# Initialize default data if not already loaded
 if "ingredient_data" not in st.session_state:
     st.session_state.ingredient_data = pd.DataFrame({
         "Ingredient": [
-            "Maize", "Soybean Meal", "Groundnut Cake", "Wheat Offal", "Fish Meal",
-            "Alfalfa", "Elephant Grass", "Guinea Grass", "Stylosanthes", "Leucaena"
+            "Maize", "Wheat Offal", "Soybean Meal", "Groundnut Cake", "Palm Kernel Cake",
+            "Alfalfa", "Elephant Grass", "Guinea Grass", "Stylosanthes", "Centrosema"
         ],
         "Category": [
             "Concentrate", "Concentrate", "Concentrate", "Concentrate", "Concentrate",
             "Fodder", "Fodder", "Fodder", "Fodder", "Fodder"
         ],
-        "CP": [9, 44, 45, 15, 60, 18, 12, 10, 20, 25],
-        "Energy": [3400, 3200, 3000, 1800, 2800, 2300, 2200, 2000, 2100, 2300],
-        "Fibre": [2, 7, 6, 10, 1, 25, 28, 30, 18, 20],
-        "Calcium": [0.02, 0.3, 0.25, 0.1, 5, 1.5, 1.2, 1.3, 1.0, 1.1],
-        "Cost": [120, 150, 130, 90, 250, 80, 60, 50, 70, 65]
+        "CP": [9.0, 15.0, 44.0, 45.0, 18.0, 18.0, 8.0, 7.0, 15.0, 12.0],
+        "Energy": [3400, 1800, 3200, 3000, 2500, 2300, 2100, 2000, 2200, 2100],
+        "Fibre": [2.0, 10.0, 7.0, 6.0, 16.0, 25.0, 28.0, 30.0, 20.0, 22.0],
+        "Calcium": [0.02, 0.1, 0.3, 0.25, 0.15, 1.5, 0.6, 0.5, 1.0, 0.8],
+        "Cost": [120, 90, 150, 130, 80, 60, 50, 45, 55, 52]
     })
 
-df = st.session_state.ingredient_data
+st.markdown("---")
 
-# Layout
-optimizer_col, editor_col, predictor_col = st.columns([1, 1, 1])
+col1, col2, col3 = st.columns(3)
 
-with optimizer_col:
+# --- Optimizer ---
+with col1:
     st.header("🧪 Optimizer")
 
-    ration_type = st.selectbox("Select Ration Type", ["Mixed", "Concentrate only", "Fodder only"])
-
-    st.markdown("### Nutrient Requirements (per kg feed)")
+    ration_type = st.radio("Choose Ration Type", ["Mixed", "Concentrate only", "Fodder only"], key="ration_type")
+    
     cp = st.slider("Crude Protein (%)", 10, 25, 16)
     energy = st.slider("Energy (Kcal/kg)", 1800, 3500, 2500)
     fibre = st.slider("Fibre (%)", 5, 30, 10)
-    calcium = st.slider("Calcium (%)", 0.1, 2.0, 0.5)
+    calcium = st.slider("Calcium (%)", 0.1, 1.5, 0.5)
 
-    # Filter ingredients
+    df = st.session_state.ingredient_data
     if ration_type == "Concentrate only":
-        df_filtered = df[df["Category"] == "Concentrate"]
+        df = df[df["Category"] == "Concentrate"]
     elif ration_type == "Fodder only":
-        df_filtered = df[df["Category"] == "Fodder"]
-    else:
-        df_filtered = df
+        df = df[df["Category"] == "Fodder"]
 
-    # LP Model
     model = LpProblem("Rabbit_Feed_Optimization", LpMinimize)
-    vars = {i: LpVariable(i, lowBound=0) for i in df_filtered["Ingredient"]}
-    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'Cost'].values[0] for i in vars])
-    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'CP'].values[0] for i in vars]) >= cp
-    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'Energy'].values[0] for i in vars]) >= energy
-    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'Fibre'].values[0] for i in vars]) >= fibre
-    model += lpSum([vars[i] * df_filtered.loc[df_filtered["Ingredient"] == i, 'Calcium'].values[0] for i in vars]) >= calcium
+    vars = {i: LpVariable(i, lowBound=0) for i in df["Ingredient"]}
+
+    model += lpSum([vars[i] * df.loc[df["Ingredient"] == i, "Cost"].values[0] for i in vars])
+    model += lpSum([vars[i] * df.loc[df["Ingredient"] == i, "CP"].values[0] for i in vars]) >= cp
+    model += lpSum([vars[i] * df.loc[df["Ingredient"] == i, "Energy"].values[0] for i in vars]) >= energy
+    model += lpSum([vars[i] * df.loc[df["Ingredient"] == i, "Fibre"].values[0] for i in vars]) >= fibre
+    model += lpSum([vars[i] * df.loc[df["Ingredient"] == i, "Calcium"].values[0] for i in vars]) >= calcium
     model += lpSum([vars[i] for i in vars]) == 1
 
     model.solve()
 
     if LpStatus[model.status] == "Optimal":
-        st.success("✅ Optimal ration found!")
+        st.success("Optimal feed mix found!")
         results = {i: vars[i].varValue for i in vars if vars[i].varValue > 0}
         result_df = pd.DataFrame.from_dict(results, orient='index', columns=['Proportion (kg)'])
-        result_df["Cost (₦)"] = result_df["Proportion (kg)"] * df_filtered.set_index("Ingredient").loc[result_df.index, 'Cost']
+        result_df["Cost (₦)"] = result_df.index.map(lambda x: result_df.loc[x, "Proportion (kg)"] * df.loc[df["Ingredient"] == x, "Cost"].values[0])
         st.dataframe(result_df)
         st.write(f"**Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
     else:
-        st.error("⚠️ No feasible solution found with current settings.")
+        st.error("No feasible solution found with current settings.")
 
-with editor_col:
-    st.header("📝 Ingredient Editor")
+# --- Ingredient Editor ---
+with col2:
+    st.header("📝 Ingredients")
+    df_editor = st.session_state.ingredient_data.copy()
+    edited_df = st.data_editor(df_editor, num_rows="dynamic", use_container_width=True)
 
-    editable_df = df.reset_index(drop=True)
-    edited_df = st.data_editor(editable_df, num_rows="dynamic", use_container_width=True)
-
-    if st.button("💾 Save Ingredients"):
+    if st.button("💾 Save Changes"):
         if "Ingredient" in edited_df.columns and edited_df["Ingredient"].notna().all() and edited_df["Ingredient"].is_unique:
             st.session_state.ingredient_data = edited_df
-            st.success("Ingredients updated successfully.")
+            st.success("Ingredient list updated successfully!")
         else:
-            st.error("Each ingredient must have a unique and non-empty name.")
+            st.error("Ensure all ingredients are uniquely named and not empty.")
 
-    uploaded_file = st.file_uploader("Upload New Ingredients (CSV)", type="csv")
-    if uploaded_file:
-        try:
-            new_data = pd.read_csv(uploaded_file)
-            if set(["Ingredient", "Category", "CP", "Energy", "Fibre", "Calcium", "Cost"]).issubset(new_data.columns):
-                st.session_state.ingredient_data = pd.concat([df, new_data], ignore_index=True).drop_duplicates("Ingredient")
-                st.success("New ingredients uploaded successfully!")
-            else:
-                st.error("CSV must contain columns: Ingredient, Category, CP, Energy, Fibre, Calcium, Cost")
-        except Exception as e:
-            st.error(f"Error reading file: {e}")
+    st.subheader("📤 Upload New Ingredients")
+    upload = st.file_uploader("Upload CSV file with Ingredient, Category, CP, Energy, Fibre, Calcium, Cost")
+    if upload:
+        uploaded_df = pd.read_csv(upload)
+        if set(["Ingredient", "Category", "CP", "Energy", "Fibre", "Calcium", "Cost"]).issubset(uploaded_df.columns):
+            st.session_state.ingredient_data = pd.concat([st.session_state.ingredient_data, uploaded_df], ignore_index=True).drop_duplicates(subset="Ingredient")
+            st.success("New ingredients added successfully!")
+        else:
+            st.error("CSV file must include all required columns.")
 
-with predictor_col:
+# --- Performance Predictor ---
+with col3:
     st.header("📈 Performance Predictor")
+
     if LpStatus[model.status] == "Optimal":
-        protein_val = lpSum([vars[i].varValue * df_filtered.set_index("Ingredient").loc[i, "CP"] for i in vars]).value()
-        energy_val = lpSum([vars[i].varValue * df_filtered.set_index("Ingredient").loc[i, "Energy"] for i in vars]).value()
+        X = df[["CP", "Energy"]].values
+        y = np.array([20 + 0.015 * cp + 0.002 * en for cp, en in X])  # Dummy values
+        model_lr = LinearRegression().fit(X, y)
 
-        # Dummy model (replace with trained model for production)
-        X_train = pd.DataFrame({"CP": [16, 18, 20], "Energy": [2400, 2600, 2800]})
-        y_train = [20, 25, 30]
-        model_lr = LinearRegression().fit(X_train, y_train)
-        gain = model_lr.predict([[protein_val, energy_val]])[0]
+        avg_cp = sum([vars[i].varValue * df.loc[df["Ingredient"] == i, "CP"].values[0] for i in vars])
+        avg_energy = sum([vars[i].varValue * df.loc[df["Ingredient"] == i, "Energy"].values[0] for i in vars])
 
-        st.metric("📊 Predicted Weight Gain", f"{gain:.2f} g/day")
-        st.caption("This is an estimate. Train with real data for accurate results.")
+        predicted_gain = model_lr.predict([[avg_cp, avg_energy]])[0]
+        st.metric("Expected Weight Gain", f"{predicted_gain:.1f} g/day")
+        st.caption("Prediction from mock-trained model. Train with real data for better results.")
     else:
-        st.info("Run the optimizer to see predictions.")
+        st.warning("Prediction unavailable. Run optimizer first.")

@@ -4,123 +4,197 @@ from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
 import plotly.express as px
 from sklearn.linear_model import LinearRegression
 import numpy as np
+from io import StringIO
 
+st.set_page_config(page_title="🐰 Rabbit Feed Formulator", layout="wide")
 st.title("🐰 Rabbit Feed Formulation Optimizer + Editor + Predictor")
 
-# --- Ingredient data with category ---
+# --- DEFAULT INGREDIENT DATA ---
+
+DEFAULT_INGREDIENTS = pd.DataFrame({
+    "Ingredient": [
+        # Concentrates
+        "Maize", "Soybean Meal", "Groundnut Cake", "Wheat Bran", "Cottonseed Cake",
+        # Fodders
+        "Alfalfa", "Guinea Grass", "Napier Grass", "Stylo", "Elephant Grass",
+        "Sorghum Stover", "Cassava Leaves", "Leucaena"
+    ],
+    "Category": [
+        "Concentrate", "Concentrate", "Concentrate", "Concentrate", "Concentrate",
+        "Fodder", "Fodder", "Fodder", "Fodder", "Fodder",
+        "Fodder", "Fodder", "Fodder"
+    ],
+    "CP": [
+        9, 44, 45, 15, 40,
+        18, 10, 9, 20, 14,
+        7, 25, 23
+    ],
+    "Energy": [
+        3400, 3200, 3000, 1800, 3100,
+        2300, 2200, 2100, 2400, 2000,
+        1800, 2300, 2100
+    ],
+    "Fibre": [
+        2, 7, 6, 10, 8,
+        25, 30, 28, 22, 26,
+        30, 20, 24
+    ],
+    "Calcium": [
+        0.02, 0.3, 0.25, 0.1, 0.4,
+        1.5, 1.2, 1.1, 1.3, 1.4,
+        1.0, 1.2, 1.3
+    ],
+    "Cost": [
+        120, 150, 130, 90, 140,
+        80, 70, 65, 85, 75,
+        60, 85, 90
+    ],
+}).set_index("Ingredient")
+
+# Load ingredient data from session state or default
 if "ingredient_data" not in st.session_state:
-    data = {
-        "Ingredient": [
-            # Concentrates
-            "Maize", "Soybean Meal", "Groundnut Cake", "Wheat Bran", "Cottonseed Cake",
-            # Fodders
-            "Alfalfa", "Napier Grass", "Clover", "Moringa Leaves", "Sweet Potato Leaves"
-        ],
-        "Category": [
-            "Concentrate", "Concentrate", "Concentrate", "Concentrate", "Concentrate",
-            "Fodder", "Fodder", "Fodder", "Fodder", "Fodder"
-        ],
-        "CP": [9, 44, 45, 15, 40, 18, 10, 22, 24, 20],
-        "Energy": [3400, 3200, 3000, 1800, 3100, 2300, 2200, 2100, 2500, 2400],
-        "Fibre": [2, 7, 6, 10, 8, 25, 28, 30, 20, 22],
-        "Calcium": [0.02, 0.3, 0.25, 0.1, 0.35, 1.5, 1.2, 1.3, 1.4, 1.3],
-        "Cost": [120, 150, 130, 90, 140, 80, 75, 70, 65, 68]
-    }
-    df = pd.DataFrame(data).set_index("Ingredient")
-    st.session_state.ingredient_data = df.copy()
+    st.session_state.ingredient_data = DEFAULT_INGREDIENTS.copy()
 
 df = st.session_state.ingredient_data
 
-# --- Option to select feed type ---
-feed_type = st.sidebar.radio("Select Feed Type for Optimization:", 
-                             ("Both (Concentrate + Fodder)", "Only Concentrates", "Only Fodders"))
+# --- Train mock regression model on dummy data for performance prediction ---
 
-if feed_type == "Only Concentrates":
-    df_filtered = df[df["Category"] == "Concentrate"]
-elif feed_type == "Only Fodders":
-    df_filtered = df[df["Category"] == "Fodder"]
-else:
-    df_filtered = df.copy()
+def train_mock_model():
+    # Dummy data simulating feed nutrient content and weight gain (g/day)
+    data = pd.DataFrame({
+        "CP": [14, 16, 18, 20, 22, 24, 26],
+        "Energy": [2100, 2300, 2500, 2700, 2900, 3100, 3300],
+        "Fibre": [12, 11, 10, 9, 8, 7, 6],
+        "Calcium": [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+        "WeightGain": [25, 30, 35, 38, 40, 42, 45]  # g/day
+    })
+    X = data[["CP", "Energy", "Fibre", "Calcium"]]
+    y = data["WeightGain"]
+    model = LinearRegression()
+    model.fit(X, y)
+    return model
 
-# --- Nutrient requirements ---
-st.sidebar.header("Nutrient Requirements (per kg feed)")
-cp = st.sidebar.slider("Crude Protein (%)", 10, 25, 16)
-energy = st.sidebar.slider("Energy (Kcal/kg)", 1800, 3500, 2500)
-fibre = st.sidebar.slider("Fibre (%)", 5, 30, 10)
-calcium = st.sidebar.slider("Calcium (%)", 0.1, 1.5, 0.5)
+if "perf_model" not in st.session_state:
+    st.session_state.perf_model = train_mock_model()
 
-# --- Optimization ---
-model = LpProblem("Rabbit_Feed_Optimization", LpMinimize)
-vars = {i: LpVariable(i, lowBound=0) for i in df_filtered.index}
+perf_model = st.session_state.perf_model
 
-# Objective: minimize cost
-model += lpSum([vars[i] * df_filtered.loc[i, 'Cost'] for i in df_filtered.index])
+# --- App tabs ---
+tab1, tab2, tab3 = st.tabs(["🧪 Optimizer", "📝 Edit Ingredients", "📈 Performance Predictor"])
 
-# Constraints
-model += lpSum([vars[i] * df_filtered.loc[i, 'CP'] for i in df_filtered.index]) >= cp
-model += lpSum([vars[i] * df_filtered.loc[i, 'Energy'] for i in df_filtered.index]) >= energy
-model += lpSum([vars[i] * df_filtered.loc[i, 'Fibre'] for i in df_filtered.index]) >= fibre
-model += lpSum([vars[i] * df_filtered.loc[i, 'Calcium'] for i in df_filtered.index]) >= calcium
-model += lpSum([vars[i] for i in df_filtered.index]) == 1  # total proportion sums to 1kg
+# --- OPTIMIZER TAB ---
+with tab1:
+    st.sidebar.header("Nutrient Requirements (per kg feed)")
+    cp_req = st.sidebar.slider("Crude Protein (%)", 10, 30, 16)
+    energy_req = st.sidebar.slider("Energy (Kcal/kg)", 1800, 3500, 2500)
+    fibre_req = st.sidebar.slider("Fibre (%)", 5, 30, 10)
+    calcium_req = st.sidebar.slider("Calcium (%)", 0.1, 1.5, 0.5)
 
-model.solve()
+    ration_type = st.selectbox("Select Ration Type", options=["Mixed (Concentrate + Fodder)", "Concentrate Only", "Fodder Only"])
 
-if LpStatus[model.status] == "Optimal":
-    st.subheader("📊 Optimized Feed Mix")
-    results = {i: vars[i].varValue for i in df_filtered.index if vars[i].varValue > 0}
-    result_df = pd.DataFrame.from_dict(results, orient='index', columns=['Proportion (kg)'])
-    result_df["Category"] = df_filtered.loc[result_df.index, "Category"]
-    result_df["Cost (₦)"] = result_df["Proportion (kg)"] * df_filtered.loc[result_df.index, 'Cost']
-    st.dataframe(result_df)
-    st.write(f"**Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
+    if ration_type == "Mixed (Concentrate + Fodder)":
+        df_opt = df.copy()
+    elif ration_type == "Concentrate Only":
+        df_opt = df[df["Category"] == "Concentrate"]
+    else:
+        df_opt = df[df["Category"] == "Fodder"]
 
-    fig = px.pie(result_df, values='Proportion (kg)', names=result_df.index, title='Feed Ingredient Distribution')
-    st.plotly_chart(fig)
+    if df_opt.empty:
+        st.error("No ingredients available for selected ration type. Please add ingredients.")
+    else:
+        model = LpProblem("Rabbit_Feed_Optimization", LpMinimize)
+        vars = {i: LpVariable(i, lowBound=0) for i in df_opt.index}
 
-    # --- Performance Prediction ---
-    st.subheader("🚀 Predicted Weight Gain")
-    # Simple linear regression model trained on dummy data for demo:
-    # Inputs: weighted CP and Energy of the mix
-    protein_val = sum(vars[i].varValue * df_filtered.loc[i, "CP"] for i in df_filtered.index)
-    energy_val = sum(vars[i].varValue * df_filtered.loc[i, "Energy"] for i in df_filtered.index)
+        # Objective: minimize cost
+        model += lpSum([vars[i] * df_opt.loc[i, "Cost"] for i in df_opt.index])
 
-    # Dummy linear regression coefficients (replace with trained model coefficients)
-    gain = 10 + 0.015 * protein_val + 0.002 * energy_val
+        # Constraints: nutrients must meet or exceed requirements
+        model += lpSum([vars[i] * df_opt.loc[i, "CP"] for i in df_opt.index]) >= cp_req
+        model += lpSum([vars[i] * df_opt.loc[i, "Energy"] for i in df_opt.index]) >= energy_req
+        model += lpSum([vars[i] * df_opt.loc[i, "Fibre"] for i in df_opt.index]) >= fibre_req
+        model += lpSum([vars[i] * df_opt.loc[i, "Calcium"] for i in df_opt.index]) >= calcium_req
 
-    st.metric("Expected Weight Gain (g/day)", f"{gain:.1f}")
-    st.info("This prediction is a simulated estimate. Use real rabbit growth data to train a better model.")
-else:
-    st.error("⚠️ No feasible solution found with current nutrient settings.")
+        # Sum of proportions = 1 (100%)
+        model += lpSum([vars[i] for i in df_opt.index]) == 1
 
-# --- Edit Ingredients Tab ---
-tab2, tab3 = st.tabs(["📝 Edit Ingredients", "📈 Upload Ingredients"])
+        model.solve()
 
+        if LpStatus[model.status] == "Optimal":
+            st.subheader("📊 Optimized Feed Mix")
+            results = {i: vars[i].varValue for i in df_opt.index if vars[i].varValue > 0}
+            result_df = pd.DataFrame.from_dict(results, orient="index", columns=["Proportion (kg)"])
+            result_df["Category"] = df_opt.loc[result_df.index, "Category"]
+            result_df["Cost (₦)"] = result_df["Proportion (kg)"] * df_opt.loc[result_df.index, "Cost"]
+            st.dataframe(result_df.style.format({"Proportion (kg)": "{:.3f}", "Cost (₦)": "₦{:.2f}"}))
+
+            st.write(f"**Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
+
+            # Pie chart by category
+            fig = px.pie(result_df, values="Proportion (kg)", names=result_df.index,
+                         color=result_df["Category"], title="Feed Ingredient Distribution by Ingredient")
+            st.plotly_chart(fig)
+        else:
+            st.error("⚠️ No feasible solution found with current nutrient settings.")
+
+# --- EDIT INGREDIENTS TAB ---
 with tab2:
     st.subheader("✍️ Modify Ingredients Table")
+
     editable_df = df.reset_index()
-    edited_df = st.data_editor(editable_df, num_rows="dynamic", use_container_width=True)
+    uploaded_file = st.file_uploader("📂 Upload CSV with new ingredients", type=["csv"])
+    if uploaded_file:
+        try:
+            new_data = pd.read_csv(uploaded_file)
+            # Validate required columns
+            required_cols = {"Ingredient", "Category", "CP", "Energy", "Fibre", "Calcium", "Cost"}
+            if not required_cols.issubset(set(new_data.columns)):
+                st.error(f"CSV must contain columns: {required_cols}")
+            else:
+                # Remove duplicates & append new data
+                existing = df.reset_index()
+                combined = pd.concat([existing, new_data], ignore_index=True)
+                combined.drop_duplicates(subset="Ingredient", keep="last", inplace=True)
+                combined.set_index("Ingredient", inplace=True)
+                st.session_state.ingredient_data = combined
+                st.success("Ingredients uploaded and merged successfully.")
+                df = st.session_state.ingredient_data
+        except Exception as e:
+            st.error(f"Failed to load CSV: {e}")
+
+    edited_df = st.data_editor(df.reset_index(), num_rows="dynamic", use_container_width=True)
     if st.button("💾 Save Changes"):
         if "Ingredient" in edited_df.columns and edited_df["Ingredient"].notna().all() and edited_df["Ingredient"].is_unique:
             edited_df = edited_df.dropna(subset=["Ingredient"])
-            edited_df = edited_df.set_index("Ingredient")
+            edited_df.set_index("Ingredient", inplace=True)
             st.session_state.ingredient_data = edited_df
             st.success("Ingredient list updated successfully!")
         else:
-            st.error("❌ Please ensure all ingredients are uniquely named and not empty.")
+            st.error("❌ Ensure all ingredients have unique, non-empty names.")
 
+    # Remove unused ingredients
+    if st.button("🧹 Remove unused ingredients"):
+        # Remove ingredients with zero in last optimization? Let's just keep all for safety here
+        st.info("Remove unused ingredients feature requires last optimization results; not implemented yet.")
+
+# --- PERFORMANCE PREDICTOR TAB ---
 with tab3:
-    st.subheader("⬆️ Upload New Ingredients (CSV)")
-    uploaded_file = st.file_uploader("Upload CSV with columns: Ingredient, Category, CP, Energy, Fibre, Calcium, Cost")
-    if uploaded_file is not None:
-        try:
-            new_df = pd.read_csv(uploaded_file)
-            required_cols = {"Ingredient", "Category", "CP", "Energy", "Fibre", "Calcium", "Cost"}
-            if not required_cols.issubset(new_df.columns):
-                st.error(f"CSV must contain columns: {required_cols}")
-            else:
-                new_df = new_df.set_index("Ingredient")
-                combined_df = pd.concat([st.session_state.ingredient_data, new_df])
-                st.session_state.ingredient_data = combined_df[~combined_df.index.duplicated(keep='last')]
-                st.success("New ingredients uploaded and merged successfully!")
-        except Exception as e:
-            st.error(f"Error reading CSV: {e}")
+    st.subheader("🚀 Performance Predictor")
+
+    if 'model' in locals() and LpStatus[model.status] == "Optimal":
+        # Calculate nutrient levels of optimized feed
+        opt_cp = sum(vars[i].varValue * df.loc[i, "CP"] for i in vars)
+        opt_energy = sum(vars[i].varValue * df.loc[i, "Energy"] for i in vars)
+        opt_fibre = sum(vars[i].varValue * df.loc[i, "Fibre"] for i in vars)
+        opt_calcium = sum(vars[i].varValue * df.loc[i, "Calcium"] for i in vars)
+
+        # Predict weight gain in g/day using regression model
+        pred_gain = perf_model.predict(np.array([[opt_cp, opt_energy, opt_fibre, opt_calcium]]))[0]
+
+        st.metric("📈 Expected Weight Gain (g/day)", f"{pred_gain:.1f} g/day")
+
+        st.info(
+            "Prediction based on a simple regression model trained on dummy data. "
+            "For real-life accuracy, train with real growth performance datasets."
+        )
+    else:
+        st.warning("⚠️ Run a successful optimization first to predict performance.")

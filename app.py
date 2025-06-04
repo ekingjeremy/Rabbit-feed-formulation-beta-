@@ -1,5 +1,76 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
+import plotly.express as px
+from streamlit_extras.switch_page_button import switch_page
+
+st.set_page_config(page_title="🐰 Rabbit Feed Formulation", layout="wide")
+st.markdown("""
+    <style>
+        .main {
+            background-color: #f9f7f1;
+        }
+        .block-container {
+            padding: 2rem;
+        }
+        h1, h2, h3 {
+            color: #6a1b9a;
+        }
+        .stTabs [data-baseweb="tab"] {
+            background-color: #f1e8ff;
+            color: #6a1b9a;
+        }
+        .stTabs [data-baseweb="tab"]:hover {
+            background-color: #d1c4e9;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+st.title("🐇 Rabbit Feed Formulation App")
+st.markdown("""
+Welcome to the **Rabbit Feed Formulation Tool**. Choose your desired ration type, set your nutrient requirements, and get the optimized ration cost and performance prediction. 🧪📈
+""")
+
+# Sidebar Configuration
+with st.sidebar:
+    st.header("⚙️ Configuration")
+    ration_type = st.radio("Ration Type", ["Mixed (Fodder + Concentrate)", "Concentrate only", "Fodder only"])
+    st.markdown("---")
+    st.subheader("🔧 Nutrient Requirements (per kg)")
+    cp_req = st.slider("Crude Protein (%)", 10, 50, 16)
+    energy_req = st.slider("Energy (Kcal/kg)", 1500, 3500, 2500)
+    fibre_req = st.slider("Fibre (%)", 5, 40, 12)
+    calcium_req = st.slider("Calcium (%)", 0.1, 5.0, 0.5)
+
+# Layout Tabs
+tab1, tab2, tab3 = st.tabs(["🔬 Optimizer", "🧾 Ingredients", "📊 Predictor"])
+
+with tab1:
+    st.header("🔬 Feed Mix Optimization")
+    st.markdown("""
+    Adjust the nutrient requirements from the sidebar and choose the ration type. The app will compute an optimal feed formula that meets your needs and minimizes cost. 
+    """)
+    st.info("Optimization logic, charts, and results displayed here after settings are applied.")
+
+with tab2:
+    st.header("🧾 Ingredient Database Editor")
+    st.markdown("""
+    Browse or modify the feed ingredients used for formulation. You can also upload a CSV of new ingredients.
+    """)
+    st.success("Editable table and CSV upload for managing feed ingredients.")
+
+with tab3:
+    st.header("📊 Performance Predictor")
+    st.markdown("""
+    After generating a formula in the optimizer, view the predicted daily weight gain based on crude protein and energy.
+    """)
+    st.warning("Run the optimizer first to see predictions here.")
+
+st.markdown("---")
+st.caption("Developed with ❤️ for Nigerian rabbit farmers by OpenAI + You")
+import streamlit as st
+import pandas as pd
 from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
 import numpy as np
 import plotly.express as px

@@ -1,85 +1,13 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
-import plotly.express as px
-from streamlit_extras.switch_page_button import switch_page
-
-st.set_page_config(page_title="🐰 Rabbit Feed Formulation", layout="wide")
-st.markdown("""
-    <style>
-        .main {
-            background-color: #f9f7f1;
-        }
-        .block-container {
-            padding: 2rem;
-        }
-        h1, h2, h3 {
-            color: #6a1b9a;
-        }
-        .stTabs [data-baseweb="tab"] {
-            background-color: #f1e8ff;
-            color: #6a1b9a;
-        }
-        .stTabs [data-baseweb="tab"]:hover {
-            background-color: #d1c4e9;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-st.title("🐇 Rabbit Feed Formulation App")
-st.markdown("""
-Welcome to the **Rabbit Feed Formulation Tool**. Choose your desired ration type, set your nutrient requirements, and get the optimized ration cost and performance prediction. 🧪📈
-""")
-
-# Sidebar Configuration
-with st.sidebar:
-    st.header("⚙️ Configuration")
-    ration_type = st.radio("Ration Type", ["Mixed (Fodder + Concentrate)", "Concentrate only", "Fodder only"])
-    st.markdown("---")
-    st.subheader("🔧 Nutrient Requirements (per kg)")
-    cp_req = st.slider("Crude Protein (%)", 10, 50, 16)
-    energy_req = st.slider("Energy (Kcal/kg)", 1500, 3500, 2500)
-    fibre_req = st.slider("Fibre (%)", 5, 40, 12)
-    calcium_req = st.slider("Calcium (%)", 0.1, 5.0, 0.5)
-
-# Layout Tabs
-tab1, tab2, tab3 = st.tabs(["🔬 Optimizer", "🧾 Ingredients", "📊 Predictor"])
-
-with tab1:
-    st.header("🔬 Feed Mix Optimization")
-    st.markdown("""
-    Adjust the nutrient requirements from the sidebar and choose the ration type. The app will compute an optimal feed formula that meets your needs and minimizes cost. 
-    """)
-    st.info("Optimization logic, charts, and results displayed here after settings are applied.")
-
-with tab2:
-    st.header("🧾 Ingredient Database Editor")
-    st.markdown("""
-    Browse or modify the feed ingredients used for formulation. You can also upload a CSV of new ingredients.
-    """)
-    st.success("Editable table and CSV upload for managing feed ingredients.")
-
-with tab3:
-    st.header("📊 Performance Predictor")
-    st.markdown("""
-    After generating a formula in the optimizer, view the predicted daily weight gain based on crude protein and energy.
-    """)
-    st.warning("Run the optimizer first to see predictions here.")
-
-st.markdown("---")
-st.caption("Developed with ❤️ for Nigerian rabbit farmers by OpenAI + You")
-import streamlit as st
-import pandas as pd
-from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatus, value
-import numpy as np
+from pulp import LpProblem, LpMinimize, LpVariable, lpSum, LpStatus, value
 import plotly.express as px
 
 st.set_page_config(page_title="🐰 Rabbit Feed Formulation Optimizer", layout="wide")
+st.title("🐰 Feed My Rabbit")
 
-st.title("Feed My Rabbit🐰")
-
-# Initialize ingredient data with Nigerian fodders and concentrates
+# --- Initialize or load data ---
 if "ingredient_data" not in st.session_state:
     data = {
         "Ingredient": [
@@ -96,76 +24,38 @@ if "ingredient_data" not in st.session_state:
             "Limestone", "Salt", "Methionine", "Lysine", "Vitamin Premix"
         ],
         "Category": [
-            # Fodders
-            "Fodder", "Fodder", "Fodder", "Fodder", "Fodder",
-            "Fodder", "Fodder", "Fodder", "Fodder",
-            "Fodder", "Fodder", "Fodder", "Fodder",
-            "Fodder", "Fodder",
-            # Concentrates
-            "Concentrate", "Concentrate", "Concentrate", "Concentrate", "Concentrate",
-            "Concentrate", "Concentrate", "Concentrate", "Concentrate",
-            "Concentrate", "Concentrate", "Concentrate", "Concentrate", "Concentrate",
-            # Minerals & Additives
-            "Mineral", "Mineral", "Additive", "Additive", "Additive"
-        ],
-        "CP": [
-            18, 8, 7, 10, 17,
-            14, 25, 24, 22,
-            20, 8, 18, 12,
-            10, 14,
-            9, 44, 45, 15, 20,
-            18, 5, 7, 14,
-            36, 60, 80, 55, 20,
-            0, 0, 0, 0, 0
-        ],
-        "Energy": [
-            2300, 2200, 2100, 2300, 2000,
-            1900, 2200, 2300, 2100,
-            2200, 2000, 2100, 2200,
-            2000, 1900,
-            3400, 3200, 3000, 1800, 2200,
-            2100, 1900, 2000, 2200,
-            2500, 3000, 2800, 2700, 2000,
-            0, 0, 0, 0, 0
-        ],
-        "Fibre": [
-            25, 32, 30, 28, 18,
-            22, 15, 16, 20,
-            18, 30, 20, 25,
-            28, 22,
-            2, 7, 6, 10, 12,
-            10, 14, 12, 13,
-            12, 1, 1, 3, 2,
-            0, 0, 0, 0, 0
-        ],
-        "Calcium": [
-            1.5, 0.5, 0.45, 0.6, 1.2,
-            1.0, 1.8, 1.7, 1.5,
-            1.2, 0.4, 1.0, 0.6,
-            0.5, 1.3,
-            0.02, 0.3, 0.25, 0.1, 0.2,
-            0.15, 0.1, 0.1, 0.2,
-            0.3, 5.0, 0.5, 0.4, 25.0,
-            38.0, 0, 0, 0, 0
-        ],
-        "Cost": [
-            80, 50, 45, 55, 70,
-            65, 90, 85, 88,
-            75, 40, 60, 58,
-            50, 60,
-            120, 150, 130, 90, 100,
-            110, 45, 55, 65,
-            140, 200, 170, 180, 160,
-            50, 30, 500, 500, 400
-        ],
+            "Fodder"] * 15 + ["Concentrate"] * 14 + ["Mineral"] * 2 + ["Additive"] * 3,
+        "CP": [18, 8, 7, 10, 17, 14, 25, 24, 22, 20, 8, 18, 12, 10, 14,
+                9, 44, 45, 15, 20, 18, 5, 7, 14, 36, 60, 80, 55, 20,
+                0, 0, 0, 0, 0],
+        "Energy": [2300, 2200, 2100, 2300, 2000, 1900, 2200, 2300, 2100,
+                   2200, 2000, 2100, 2200, 2000, 1900,
+                   3400, 3200, 3000, 1800, 2200, 2100, 1900, 2000, 2200,
+                   2500, 3000, 2800, 2700, 2000,
+                   0, 0, 0, 0, 0],
+        "Fibre": [25, 32, 30, 28, 18, 22, 15, 16, 20,
+                  18, 30, 20, 25, 28, 22,
+                  2, 7, 6, 10, 12, 10, 14, 12, 13,
+                  12, 1, 1, 3, 2,
+                  0, 0, 0, 0, 0],
+        "Calcium": [1.5, 0.5, 0.45, 0.6, 1.2, 1.0, 1.8, 1.7, 1.5,
+                    1.2, 0.4, 1.0, 0.6, 0.5, 1.3,
+                    0.02, 0.3, 0.25, 0.1, 0.2, 0.15, 0.1, 0.1, 0.2,
+                    0.3, 5.0, 0.5, 0.4, 25.0,
+                    38.0, 0, 0, 0, 0],
+        "Cost": [80, 50, 45, 55, 70, 65, 90, 85, 88,
+                 75, 40, 60, 58, 50, 60,
+                 120, 150, 130, 90, 100, 110, 45, 55, 65,
+                 140, 200, 170, 180, 160,
+                 50, 30, 500, 500, 400],
     }
     df = pd.DataFrame(data).set_index("Ingredient")
     st.session_state.ingredient_data = df.copy()
 else:
     df = st.session_state.ingredient_data
 
-# Sidebar for user inputs
-st.sidebar.header("🐰 Nutrient Requirements (per kg feed)")
+# --- Sidebar ---
+st.sidebar.header("🐰 Nutrient Requirements")
 cp_req = st.sidebar.slider("Crude Protein (%)", 10, 50, 16)
 energy_req = st.sidebar.slider("Energy (Kcal/kg)", 1500, 3500, 2500)
 fibre_req = st.sidebar.slider("Fibre (%)", 5, 40, 12)
@@ -177,35 +67,27 @@ ration_type = st.sidebar.selectbox(
     ["Mixed (Fodder + Concentrate)", "Concentrate only", "Fodder only"]
 )
 
-# Filter ingredients based on ration type
+# --- Filter ingredients ---
 if ration_type == "Concentrate only":
     ingredients = df[df['Category'] == "Concentrate"]
 elif ration_type == "Fodder only":
     ingredients = df[df['Category'] == "Fodder"]
 else:
-    ingredients = df[(df['Category'] == "Concentrate") | (df['Category'] == "Fodder")]
+    ingredients = df[df['Category'].isin(["Fodder", "Concentrate"])]
 
-# Tabs for the app sections
-tab1, tab2, tab3 = st.tabs(["🧪 Optimizer", "📝 Edit Ingredients", "📈 Performance Predictor"])
+# --- Tabs ---
+tab1, tab2, tab3 = st.tabs(["🧪 Optimizer", "📝 Ingredients", "📈 Performance"])
 
-# ----- Optimizer Tab -----
+# --- Optimizer ---
 with tab1:
     st.header("🧪 Feed Mix Optimization")
-
-    # Define LP model
     model = LpProblem("Rabbit_Feed_Optimization", LpMinimize)
     vars = {i: LpVariable(i, lowBound=0) for i in ingredients.index}
-
-    # Objective: minimize total cost
     model += lpSum([vars[i] * ingredients.loc[i, 'Cost'] for i in ingredients.index])
-
-    # Nutrient constraints
     model += lpSum([vars[i] * ingredients.loc[i, 'CP'] for i in ingredients.index]) >= cp_req
     model += lpSum([vars[i] * ingredients.loc[i, 'Energy'] for i in ingredients.index]) >= energy_req
     model += lpSum([vars[i] * ingredients.loc[i, 'Fibre'] for i in ingredients.index]) >= fibre_req
     model += lpSum([vars[i] * ingredients.loc[i, 'Calcium'] for i in ingredients.index]) >= calcium_req
-
-    # Total weight sum = 1 kg feed
     model += lpSum([vars[i] for i in ingredients.index]) == 1
 
     model.solve()
@@ -217,21 +99,16 @@ with tab1:
         result_df["Cost (₦)"] = result_df["Proportion (kg)"] * ingredients.loc[result_df.index, 'Cost']
         st.dataframe(result_df.style.format({"Proportion (kg)": "{:.3f}", "Cost (₦)": "₦{:.2f}"}))
         st.write(f"**Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
-
-        # Pie chart visualization
-        fig = px.pie(result_df, values='Proportion (kg)', names=result_df.index, title='Feed Ingredient Distribution')
-        st.plotly_chart(fig)
+        st.plotly_chart(px.pie(result_df, values='Proportion (kg)', names=result_df.index, title='Ingredient Distribution'))
     else:
-        st.error("⚠️ No feasible solution found with current nutrient requirements and ration type.")
+        st.error("⚠️ No feasible solution found.")
 
-# ----- Edit Ingredients Tab -----
+# --- Ingredients ---
 with tab2:
-    st.header("📝 Modify Ingredients Table")
-
+    st.header("📝 Edit Ingredients")
     editable_df = df.reset_index()
     edited_df = st.data_editor(editable_df, num_rows="dynamic", use_container_width=True)
 
-    # Upload new ingredients CSV
     st.subheader("📤 Upload New Ingredients CSV")
     uploaded_file = st.file_uploader("Upload CSV with columns: Ingredient, Category, CP, Energy, Fibre, Calcium, Cost", type=["csv"])
     if uploaded_file:
@@ -243,35 +120,27 @@ with tab2:
             df = st.session_state.ingredient_data.copy()
             st.success(f"Successfully added {len(new_ingredients)} new ingredients.")
         else:
-            st.error(f"CSV must contain columns: {required_cols}")
+            st.error("CSV must contain the correct columns.")
 
-    if st.button("💾 Save Changes to Ingredients"):
+    if st.button("💾 Save Changes"):
         if edited_df["Ingredient"].is_unique and edited_df["Ingredient"].notnull().all():
-            edited_df = edited_df.dropna(subset=["Ingredient"])
             st.session_state.ingredient_data = edited_df.set_index("Ingredient")
             df = st.session_state.ingredient_data.copy()
-            st.success("Ingredients list updated successfully!")
+            st.success("Ingredients updated successfully!")
         else:
-            st.error("All ingredient names must be unique and not empty.")
+            st.error("All ingredient names must be unique and non-empty.")
 
-# ----- Performance Predictor Tab -----
+# --- Predictor ---
 with tab3:
-    st.header("📈 Performance Predictor")
-
+    st.header("📈 Performance Prediction")
     if LpStatus[model.status] == "Optimal":
-        # Extract optimized feed nutrient contents
         proportions = np.array([vars[i].varValue for i in ingredients.index])
         cp_vals = np.array([ingredients.loc[i, "CP"] for i in ingredients.index])
         energy_vals = np.array([ingredients.loc[i, "Energy"] for i in ingredients.index])
-
         feed_cp = np.dot(proportions, cp_vals)
         feed_energy = np.dot(proportions, energy_vals)
-
-        # Dummy AI model (replace with trained ML model for real predictions)
-        weight_gain = 8 + 0.02 * feed_cp + 0.0015 * feed_energy  # example formula
-
-        st.metric(label="Expected Weight Gain (g/day)", value=f"{weight_gain:.2f}")
-
-        st.info("Note: This prediction is simulated. Train a real model on rabbit growth data for accurate results.")
+        weight_gain = 8 + 0.02 * feed_cp + 0.0015 * feed_energy
+        st.metric("Expected Weight Gain (g/day)", f"{weight_gain:.2f}")
+        st.info("Note: Prediction is simulated. Train model with real data for accuracy.")
     else:
-        st.warning("Run the optimizer first to get performance predictions.")
+        st.warning("Run the optimizer to get predictions.")

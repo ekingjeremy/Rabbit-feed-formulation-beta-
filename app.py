@@ -7,7 +7,7 @@ import plotly.express as px
 st.set_page_config(page_title="🐰 Rabbit Feed Formulation Optimizer", layout="wide")
 
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/3/3f/Bunny_bunnies_rabbits.jpg", use_container_width=True)
+    st.image("https://unsplash.com/photos/r_GJCQvqhJM", use_container_width=True)
     st.title("🐰 Feed My Rabbit")
 
     st.markdown("---")

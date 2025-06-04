@@ -5,7 +5,22 @@ from pulp import LpProblem, LpMinimize, LpVariable, lpSum, LpStatus, value
 import plotly.express as px
 
 st.set_page_config(page_title="🐰 Rabbit Feed Formulation Optimizer", layout="wide")
-st.title("🐰 Feed My Rabbit")
+
+with st.sidebar:
+    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Rabbit_in_montana.jpg/320px-Rabbit_in_montana.jpg", use_column_width=True)
+    st.title("🐰 Feed My Rabbit")
+
+    st.markdown("---")
+    st.subheader("📋 Nutrient Requirements")
+    cp_req = st.slider("Crude Protein (%)", 10, 50, 16, help="Set the required Crude Protein content of the diet")
+    energy_req = st.slider("Energy (Kcal/kg)", 1500, 3500, 2500, help="Set the energy requirement")
+    fibre_req = st.slider("Fibre (%)", 5, 40, 12, help="Set the required fiber content")
+    calcium_req = st.slider("Calcium (%)", 0.1, 5.0, 0.5, help="Set the required calcium level")
+
+    st.markdown("---")
+    st.subheader("🥗 Ration Type")
+    ration_type = st.selectbox("Choose feed composition:",
+        ["Mixed (Fodder + Concentrate)", "Concentrate only", "Fodder only"])
 
 # --- Initialize or load data ---
 if "ingredient_data" not in st.session_state:
@@ -54,20 +69,6 @@ if "ingredient_data" not in st.session_state:
 else:
     df = st.session_state.ingredient_data
 
-# --- Sidebar ---
-st.sidebar.header("🐰 Nutrient Requirements")
-cp_req = st.sidebar.slider("Crude Protein (%)", 10, 50, 16)
-energy_req = st.sidebar.slider("Energy (Kcal/kg)", 1500, 3500, 2500)
-fibre_req = st.sidebar.slider("Fibre (%)", 5, 40, 12)
-calcium_req = st.sidebar.slider("Calcium (%)", 0.1, 5.0, 0.5)
-
-st.sidebar.header("🐰 Ration Type")
-ration_type = st.sidebar.selectbox(
-    "Select feed ration type:",
-    ["Mixed (Fodder + Concentrate)", "Concentrate only", "Fodder only"]
-)
-
-# --- Filter ingredients ---
 if ration_type == "Concentrate only":
     ingredients = df[df['Category'] == "Concentrate"]
 elif ration_type == "Fodder only":
@@ -76,11 +77,11 @@ else:
     ingredients = df[df['Category'].isin(["Fodder", "Concentrate"])]
 
 # --- Tabs ---
-tab1, tab2, tab3 = st.tabs(["🧪 Optimizer", "📝 Ingredients", "📈 Performance"])
+tab1, tab2, tab3 = st.tabs(["🔬 Optimizer", "📋 Ingredients", "📈 Prediction"])
 
-# --- Optimizer ---
+# --- Optimizer Tab ---
 with tab1:
-    st.header("🧪 Feed Mix Optimization")
+    st.header("🔬 Feed Mix Optimizer")
     model = LpProblem("Rabbit_Feed_Optimization", LpMinimize)
     vars = {i: LpVariable(i, lowBound=0) for i in ingredients.index}
     model += lpSum([vars[i] * ingredients.loc[i, 'Cost'] for i in ingredients.index])
@@ -89,23 +90,22 @@ with tab1:
     model += lpSum([vars[i] * ingredients.loc[i, 'Fibre'] for i in ingredients.index]) >= fibre_req
     model += lpSum([vars[i] * ingredients.loc[i, 'Calcium'] for i in ingredients.index]) >= calcium_req
     model += lpSum([vars[i] for i in ingredients.index]) == 1
-
     model.solve()
 
     if LpStatus[model.status] == "Optimal":
-        st.success("Optimal feed formulation found!")
+        st.success("✅ Optimal feed formulation found!")
         results = {i: vars[i].varValue for i in ingredients.index if vars[i].varValue > 0.0001}
         result_df = pd.DataFrame.from_dict(results, orient='index', columns=['Proportion (kg)'])
         result_df["Cost (₦)"] = result_df["Proportion (kg)"] * ingredients.loc[result_df.index, 'Cost']
         st.dataframe(result_df.style.format({"Proportion (kg)": "{:.3f}", "Cost (₦)": "₦{:.2f}"}))
-        st.write(f"**Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
-        st.plotly_chart(px.pie(result_df, values='Proportion (kg)', names=result_df.index, title='Ingredient Distribution'))
+        st.write(f"**💸 Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
+        st.plotly_chart(px.pie(result_df, values='Proportion (kg)', names=result_df.index, title='🥣 Ingredient Distribution'))
     else:
-        st.error("⚠️ No feasible solution found.")
+        st.error("⚠️ No feasible solution found with current nutrient requirements.")
 
-# --- Ingredients ---
+# --- Ingredients Tab ---
 with tab2:
-    st.header("📝 Edit Ingredients")
+    st.header("📋 Manage Ingredients")
     editable_df = df.reset_index()
     edited_df = st.data_editor(editable_df, num_rows="dynamic", use_container_width=True)
 
@@ -118,21 +118,21 @@ with tab2:
             new_ingredients = new_ingredients.set_index("Ingredient")
             st.session_state.ingredient_data = pd.concat([st.session_state.ingredient_data, new_ingredients])
             df = st.session_state.ingredient_data.copy()
-            st.success(f"Successfully added {len(new_ingredients)} new ingredients.")
+            st.success(f"✅ Successfully added {len(new_ingredients)} new ingredients.")
         else:
-            st.error("CSV must contain the correct columns.")
+            st.error("❌ CSV must contain all required columns.")
 
     if st.button("💾 Save Changes"):
         if edited_df["Ingredient"].is_unique and edited_df["Ingredient"].notnull().all():
             st.session_state.ingredient_data = edited_df.set_index("Ingredient")
             df = st.session_state.ingredient_data.copy()
-            st.success("Ingredients updated successfully!")
+            st.success("✅ Ingredients updated successfully!")
         else:
-            st.error("All ingredient names must be unique and non-empty.")
+            st.error("❌ All ingredient names must be unique and non-empty.")
 
-# --- Predictor ---
+# --- Prediction Tab ---
 with tab3:
-    st.header("📈 Performance Prediction")
+    st.header("📈 Growth Prediction")
     if LpStatus[model.status] == "Optimal":
         proportions = np.array([vars[i].varValue for i in ingredients.index])
         cp_vals = np.array([ingredients.loc[i, "CP"] for i in ingredients.index])
@@ -140,7 +140,7 @@ with tab3:
         feed_cp = np.dot(proportions, cp_vals)
         feed_energy = np.dot(proportions, energy_vals)
         weight_gain = 8 + 0.02 * feed_cp + 0.0015 * feed_energy
-        st.metric("Expected Weight Gain (g/day)", f"{weight_gain:.2f}")
-        st.info("Note: Prediction is simulated. Train model with real data for accuracy.")
+        st.metric("📈 Expected Weight Gain (g/day)", f"{weight_gain:.2f}")
+        st.info("This is a simulated prediction. Replace with trained model for higher accuracy.")
     else:
-        st.warning("Run the optimizer to get predictions.")
+        st.warning("Run the optimizer to get performance predictions.")

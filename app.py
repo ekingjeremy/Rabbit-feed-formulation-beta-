@@ -6,7 +6,7 @@ import plotly.express as px
 
 st.set_page_config(page_title="🐰 Rabbit Feed Formulation Optimizer", layout="wide")
 
-st.title("🐰 Rabbit Feed Formulation Optimizer + Editor + Predictor")
+st.title("Feed My Rabbit🐰")
 
 # Initialize ingredient data with Nigerian fodders and concentrates
 if "ingredient_data" not in st.session_state:

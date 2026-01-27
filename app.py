@@ -41,7 +41,8 @@ with st.sidebar:
 # ---------------- INGREDIENT DATABASE ----------------
 if "ingredient_data" not in st.session_state:
     data = {
-        "Ingredient": [ "Alfalfa","Elephant Grass","Gamba Grass","Guinea Grass","Centrosema",
+        "Ingredient": [
+            "Alfalfa","Elephant Grass","Gamba Grass","Guinea Grass","Centrosema",
             "Stylosanthes","Leucaena","Gliricidia","Calliandra calothyrsus",
             "Cowpea Fodder","Sorghum Fodder","Cassava Leaves","Napier Grass",
             "Teff Grass","Faidherbia albida Pods",
@@ -58,8 +59,7 @@ if "ingredient_data" not in st.session_state:
         "Calcium": [1.5,0.5,0.45,0.6,1.2,1.0,1.8,1.7,1.5,1.2,0.4,1.0,0.6,0.5,1.3,
                     0.02,0.3,0.25,0.1,0.2,0.15,0.1,0.1,0.2,0.3,5.0,0.5,0.4,25.0,38.0,0,0,0,0],
         "Cost": [80,50,45,55,70,65,90,85,88,75,40,60,58,50,60,120,150,130,90,100,110,45,55,65,140,200,170,180,160,50,30,500,500,400],
-
-
+    }
     df = pd.DataFrame(data).set_index("Ingredient")
     st.session_state.ingredient_data = df.copy()
 else:

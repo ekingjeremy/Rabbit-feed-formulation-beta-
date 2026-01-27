@@ -19,8 +19,6 @@ breed_data = {
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
     st.title("🐰 Feed My Rabbit")
-
-    st.subheader("🐇 Rabbit Profile")
     selected_breed = st.selectbox("Select Rabbit Breed", list(breed_data.keys()))
     age_weeks = st.slider("Age (weeks)", 4, 52, 12)
     breed_info = breed_data[selected_breed]
@@ -65,6 +63,7 @@ if "ingredient_data" not in st.session_state:
 else:
     df = st.session_state.ingredient_data
 
+# ---------------- FILTER INGREDIENTS BY RATION TYPE ----------------
 if ration_type == "Concentrate only":
     ingredients = df[df['Category'] == "Concentrate"]
 elif ration_type == "Fodder only":
@@ -83,12 +82,10 @@ with tab1:
 
     model += lpSum(vars[i] * ingredients.loc[i, 'Cost'] for i in ingredients.index)
     model += lpSum(vars[i] for i in ingredients.index) == 1
-
     model += lpSum(vars[i] * ingredients.loc[i, 'CP'] for i in ingredients.index) >= cp_req
     model += lpSum(vars[i] * ingredients.loc[i, 'Energy'] for i in ingredients.index) >= energy_req
     model += lpSum(vars[i] * ingredients.loc[i, 'Fibre'] for i in ingredients.index) >= fibre_req
     model += lpSum(vars[i] * ingredients.loc[i, 'Calcium'] for i in ingredients.index) >= calcium_req
-
     model += lpSum(vars[i] * ingredients.loc[i, 'CP'] for i in ingredients.index) <= cp_req + 4
     model += lpSum(vars[i] * ingredients.loc[i, 'Fibre'] for i in ingredients.index) <= fibre_req + 8
 
@@ -111,6 +108,33 @@ with tab1:
         st.plotly_chart(px.pie(result_df, values='Proportion (kg)', names=result_df.index))
     else:
         st.error("No feasible solution found.")
+
+# ---------------- INGREDIENTS TAB ----------------
+with tab2:
+    st.header("📋 Manage Ingredients")
+    editable_df = df.reset_index()
+    edited_df = st.data_editor(editable_df, num_rows="dynamic", use_container_width=True)
+
+    st.subheader("📤 Upload New Ingredients CSV")
+    uploaded_file = st.file_uploader("Upload CSV with columns: Ingredient, Category, CP, Energy, Fibre, Calcium, Cost", type=["csv"])
+    if uploaded_file:
+        new_ingredients = pd.read_csv(uploaded_file)
+        required_cols = {"Ingredient", "Category", "CP", "Energy", "Fibre", "Calcium", "Cost"}
+        if required_cols.issubset(new_ingredients.columns):
+            new_ingredients = new_ingredients.set_index("Ingredient")
+            st.session_state.ingredient_data = pd.concat([st.session_state.ingredient_data, new_ingredients])
+            df = st.session_state.ingredient_data.copy()
+            st.success(f"✅ Successfully added {len(new_ingredients)} new ingredients.")
+        else:
+            st.error("❌ CSV must contain all required columns.")
+
+    if st.button("💾 Save Changes"):
+        if edited_df["Ingredient"].is_unique and edited_df["Ingredient"].notnull().all():
+            st.session_state.ingredient_data = edited_df.set_index("Ingredient")
+            df = st.session_state.ingredient_data.copy()
+            st.success("✅ Ingredients updated successfully!")
+        else:
+            st.error("❌ All ingredient names must be unique and non-empty.")
 
 # ---------------- GROWTH PREDICTION ----------------
 with tab3:

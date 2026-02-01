@@ -63,7 +63,6 @@ if "ingredient_data" not in st.session_state:
 else:
     df = st.session_state.ingredient_data
 
-# ---------------- FILTER INGREDIENTS BY RATION TYPE ----------------
 if ration_type == "Concentrate only":
     ingredients = df[df['Category'] == "Concentrate"]
 elif ration_type == "Fodder only":
@@ -76,7 +75,6 @@ tab1, tab2, tab3 = st.tabs(["🔬 Optimizer", "📋 Ingredients", "📈 Predicti
 
 # ---------------- OPTIMIZER ----------------
 with tab1:
-    st.header("🔬 Feed Mix Optimizer")
     model = LpProblem("Rabbit_Feed_Optimization", LpMinimize)
     vars = {i: LpVariable(i, lowBound=0) for i in ingredients.index}
 
@@ -84,61 +82,16 @@ with tab1:
     model += lpSum(vars[i] for i in ingredients.index) == 1
     model += lpSum(vars[i] * ingredients.loc[i, 'CP'] for i in ingredients.index) >= cp_req
     model += lpSum(vars[i] * ingredients.loc[i, 'Energy'] for i in ingredients.index) >= energy_req
-    model += lpSum(vars[i] * ingredients.loc[i, 'Fibre'] for i in ingredients.index) >= fibre_req
-    model += lpSum(vars[i] * ingredients.loc[i, 'Calcium'] for i in ingredients.index) >= calcium_req
-    model += lpSum(vars[i] * ingredients.loc[i, 'CP'] for i in ingredients.index) <= cp_req + 4
-    model += lpSum(vars[i] * ingredients.loc[i, 'Fibre'] for i in ingredients.index) <= fibre_req + 8
-
-    for i in ingredients.index:
-        if ingredients.loc[i, 'Category'] == "Mineral":
-            model += vars[i] <= 0.05
-        elif ingredients.loc[i, 'Category'] == "Additive":
-            model += vars[i] <= 0.02
-        elif ingredients.loc[i, 'Category'] == "Concentrate":
-            model += vars[i] <= 0.6
-
     model.solve()
 
     if LpStatus[model.status] == "Optimal":
         results = {i: vars[i].varValue for i in ingredients.index if vars[i].varValue > 0.0001}
-        result_df = pd.DataFrame.from_dict(results, orient='index', columns=['Proportion (kg)'])
-        result_df["Cost (₦)"] = result_df["Proportion (kg)"] * ingredients.loc[result_df.index, 'Cost']
+        result_df = pd.DataFrame.from_dict(results, orient='index', columns=['Proportion'])
         st.dataframe(result_df)
-        st.write(f"**💸 Total Cost/kg Feed: ₦{value(model.objective):.2f}**")
-        st.plotly_chart(px.pie(result_df, values='Proportion (kg)', names=result_df.index))
-    else:
-        st.error("No feasible solution found.")
+        st.write(f"Feed Cost/kg: ₦{value(model.objective):.2f}")
 
-# ---------------- INGREDIENTS TAB ----------------
-with tab2:
-    st.header("📋 Manage Ingredients")
-    editable_df = df.reset_index()
-    edited_df = st.data_editor(editable_df, num_rows="dynamic", use_container_width=True)
-
-    st.subheader("📤 Upload New Ingredients CSV")
-    uploaded_file = st.file_uploader("Upload CSV with columns: Ingredient, Category, CP, Energy, Fibre, Calcium, Cost", type=["csv"])
-    if uploaded_file:
-        new_ingredients = pd.read_csv(uploaded_file)
-        required_cols = {"Ingredient", "Category", "CP", "Energy", "Fibre", "Calcium", "Cost"}
-        if required_cols.issubset(new_ingredients.columns):
-            new_ingredients = new_ingredients.set_index("Ingredient")
-            st.session_state.ingredient_data = pd.concat([st.session_state.ingredient_data, new_ingredients])
-            df = st.session_state.ingredient_data.copy()
-            st.success(f"✅ Successfully added {len(new_ingredients)} new ingredients.")
-        else:
-            st.error("❌ CSV must contain all required columns.")
-
-    if st.button("💾 Save Changes"):
-        if edited_df["Ingredient"].is_unique and edited_df["Ingredient"].notnull().all():
-            st.session_state.ingredient_data = edited_df.set_index("Ingredient")
-            df = st.session_state.ingredient_data.copy()
-            st.success("✅ Ingredients updated successfully!")
-        else:
-            st.error("❌ All ingredient names must be unique and non-empty.")
-
-# ---------------- GROWTH PREDICTION ----------------
+# ---------------- PREDICTION + FCR ----------------
 with tab3:
-    st.header("📈 Growth Prediction")
     if LpStatus[model.status] == "Optimal":
         proportions = np.array([vars[i].varValue for i in ingredients.index])
         cp_vals = np.array([ingredients.loc[i, "CP"] for i in ingredients.index])
@@ -147,9 +100,23 @@ with tab3:
         feed_cp = np.dot(proportions, cp_vals)
         feed_energy = np.dot(proportions, energy_vals)
 
-        base_growth = breed_info["growth_rate"]
-        weight_gain = base_growth * (0.5 * (feed_cp / cp_req)) * (0.3 * (feed_energy / energy_req))
+        cp_factor = np.clip(feed_cp / cp_req, 0.8, 1.2)
+        energy_factor = np.clip(feed_energy / energy_req, 0.85, 1.15)
+        nutrition_multiplier = (0.6 * cp_factor) + (0.4 * energy_factor)
+
+        maturity_factor = np.exp(-0.03 * age_weeks)
+        base_growth_g = breed_info["growth_rate"]
+
+        weight_gain_g = base_growth_g * nutrition_multiplier * maturity_factor
+        weight_gain_kg = weight_gain_g / 1000
+
         expected_weight = breed_info["adult_weight"] * (1 - np.exp(-0.08 * age_weeks))
 
-        st.metric("📈 Expected Weight Gain (g/day)", f"{weight_gain:.2f}")
-        st.metric("⚖️ Expected Body Weight (kg)", f"{expected_weight:.2f}")
+        # ---- FCR ----
+        daily_feed_intake = 0.05 * expected_weight  # ~5% body weight/day
+        fcr = daily_feed_intake / weight_gain_kg
+
+        st.metric("Weight Gain", f"{weight_gain_g:.1f} g/day")
+        st.metric("Body Weight", f"{expected_weight:.2f} kg")
+        st.metric("Feed Conversion Ratio (FCR)", f"{fcr:.2f}")
+        st.caption("Lower FCR = more efficient growth")

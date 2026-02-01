@@ -5,7 +5,7 @@ from pulp import LpProblem, LpMinimize, LpVariable, lpSum, LpStatus, value
 import plotly.express as px
 
 # ---------------- PAGE CONFIG ----------------
-st.set_page_config(page_title="🐄🐰🐔 Jeremiah'sNigerian Livestock Feed Optimizer", layout="wide")
+st.set_page_config(page_title="🐄🐰🐔 Jeremiah's Nigerian Livestock Feed Optimizer", layout="wide")
 
 # ---------------- INGREDIENT DATABASE ----------------
 @st.cache_data

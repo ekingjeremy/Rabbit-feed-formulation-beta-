@@ -139,6 +139,7 @@ with tab2:
 # ---------------- GROWTH PREDICTION ----------------
 with tab3:
     st.header("📈 Growth Prediction")
+
     if LpStatus[model.status] == "Optimal":
         proportions = np.array([vars[i].varValue for i in ingredients.index])
         cp_vals = np.array([ingredients.loc[i, "CP"] for i in ingredients.index])
@@ -147,9 +148,16 @@ with tab3:
         feed_cp = np.dot(proportions, cp_vals)
         feed_energy = np.dot(proportions, energy_vals)
 
-        base_growth = breed_info["growth_rate"]
-        weight_gain = base_growth * (0.5 * (feed_cp / cp_req)) * (0.3 * (feed_energy / energy_req))
-        expected_weight = breed_info["adult_weight"] * (1 - np.exp(-0.08 * age_weeks))
+        # -------- DAILY WEIGHT GAIN --------
+        base_growth_g = breed_info["growth_rate"]  # already in grams/day
+        weight_gain_g = base_growth_g * (0.5 * (feed_cp / cp_req)) * (0.3 * (feed_energy / energy_req))
+        weight_gain_kg = weight_gain_g / 1000  # convert to kg
 
-        st.metric("📈 Expected Weight Gain (g/day)", f"{weight_gain:.2f}")
-        st.metric("⚖️ Expected Body Weight (kg)", f"{expected_weight:.2f}")
+        # -------- EXPECTED BODY WEIGHT --------
+        expected_weight_kg = breed_info["adult_weight"] * (1 - np.exp(-0.08 * age_weeks))
+        expected_weight_g = expected_weight_kg * 1000  # convert to grams
+
+        # -------- DISPLAY --------
+        st.metric("📈 Expected Weight Gain", f"{weight_gain_g:.1f} g/day")
+        st.metric("⚖️ Expected Body Weight", f"{expected_weight_kg:.2f} kg")
+        st.metric("⚖️ Expected Body Weight (grams)", f"{expected_weight_g:.0f} g")

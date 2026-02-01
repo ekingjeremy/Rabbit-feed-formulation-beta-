@@ -5,9 +5,9 @@ from pulp import LpProblem, LpMinimize, LpVariable, lpSum, LpStatus, value
 import plotly.express as px
 
 # ---------------- PAGE CONFIG ----------------
-st.set_page_config(page_title="Livestock Feed Optimizer", layout="wide")
+st.set_page_config(page_title="🐄🐰🐔 Nigerian Livestock Feed Optimizer", layout="wide")
 
-# ---------------- INGREDIENT DATABASE (EMBEDDED) ----------------
+# ---------------- INGREDIENT DATABASE ----------------
 @st.cache_data
 def load_ingredients():
     data = {
@@ -62,21 +62,23 @@ cattle_types = {
 # ---------------- LANDING PAGE ----------------
 st.title("🐄🐰🐔 Nigerian Livestock Feed Formulator")
 st.markdown("""
-Optimize feed for **Rabbits, Poultry, and Cattle** using Nigerian ingredient data.
-Prices, nutrients, and ingredients are editable.
+This app allows you to **formulate feed for Rabbits, Poultry, and Cattle** using Nigerian ingredients.
+You can select **Concentrate vs Fodder**, edit ingredient prices, and see **growth predictions**.
 """)
 
-animal_choice = st.selectbox("Choose an animal:", ["Rabbit", "Poultry", "Cattle"])
+animal_choice = st.selectbox("Select an animal to formulate feed for:", ["Rabbit", "Poultry", "Cattle"])
 
-# ---------------- LAYOUT AND SETTINGS ----------------
+# ---------------- CREATE TABS ----------------
 tab1, tab2, tab3 = st.tabs(["Feed Optimizer", "Manage Ingredients", "Growth Prediction"])
 
+# ---------------- SIDEBAR SETTINGS ----------------
 with st.sidebar:
     st.header("Feed Settings")
     ration_type = st.selectbox("Ration Type", ["Mixed (Fodder+Concentrate)","Concentrate only","Fodder only"])
+    
     if animal_choice=="Rabbit":
         breed = st.selectbox("Rabbit Breed", list(rabbit_breeds.keys()))
-        age_weeks = st.slider("Age (weeks)",4,52,12)
+        age_weeks = st.slider("Age (weeks)", 4, 52, 12)
         binfo = rabbit_breeds[breed]
         cp_req = st.slider("Crude Protein (%)",10,50,binfo["cp_need"])
         energy_req = st.slider("Energy (kcal/kg)",1500,3500,2500)
@@ -89,6 +91,7 @@ with st.sidebar:
         energy_req = st.slider("Energy (kcal/kg)",2500,3500,pinfo["Energy"])
         fibre_req = st.slider("Fibre (%)",0,10,5)
         calcium_req = st.slider("Calcium (%)",0.5,4.0,1.0)
+        age_weeks = 12
     else:
         ctype = st.selectbox("Cattle Type", list(cattle_types.keys()))
         cinfo = cattle_types[ctype]
@@ -106,18 +109,25 @@ elif ration_type=="Fodder only":
 else:
     ingredients=df[df['Category'].isin(["Fodder","Concentrate","Additive","Mineral"])]
 
-# ---------------- OPTIMIZER ----------------
+# ---------------- FEED OPTIMIZER ----------------
 with tab1:
     st.header(f"🔬 {animal_choice} Feed Optimizer")
-    model = LpProblem("FeedOptimization",LpMinimize)
+    model = LpProblem("FeedOptimization", LpMinimize)
     vars = {i: LpVariable(i,lowBound=0) for i in ingredients.index}
+
+    # Objective: minimize cost
     model += lpSum(vars[i]*ingredients.loc[i,"Cost (₦/kg)"] for i in ingredients.index)
+    
+    # Total proportion = 1
     model += lpSum(vars[i] for i in ingredients.index)==1
+    
+    # Nutrient constraints
     model += lpSum(vars[i]*ingredients.loc[i,"CP (%)"] for i in ingredients.index)>=cp_req
     model += lpSum(vars[i]*ingredients.loc[i,"Energy (kcal/kg)"] for i in ingredients.index)>=energy_req
     model += lpSum(vars[i]*ingredients.loc[i,"Fibre (%)"] for i in ingredients.index)>=fibre_req
     model += lpSum(vars[i]*ingredients.loc[i,"Calcium (%)"] for i in ingredients.index)>=calcium_req
 
+    # Limits for minerals and additives
     for i in ingredients.index:
         if ingredients.loc[i,"Category"]=="Mineral":
             model += vars[i]<=0.05
@@ -126,7 +136,9 @@ with tab1:
         elif ingredients.loc[i,"Category"]=="Concentrate":
             model += vars[i]<=0.6
 
+    # Solve
     model.solve()
+
     if LpStatus[model.status]=="Optimal":
         res={i: vars[i].varValue for i in ingredients.index if vars[i].varValue>0.0001}
         res_df=pd.DataFrame.from_dict(res,orient="index",columns=["Proportion (kg)"])
@@ -162,13 +174,17 @@ with tab3:
         enervals=np.array([ingredients.loc[i,"Energy (kcal/kg)"] for i in ingredients.index])
         feed_cp=np.dot(props,cpvals)
         feed_energy=np.dot(props,enervals)
+
         if animal_choice=="Rabbit":
-            base=growth_rate=binfo["growth_rate"]
+            base=binfo["growth_rate"]
             expected=binfo["adult_weight"]*(1-np.exp(-0.08*age_weeks))
         elif animal_choice=="Poultry":
-            base=50; expected=2.5
+            base=50  # simplified
+            expected=2.5
         else:
-            base=cinfo["growth_rate"]; expected=cinfo["adult_weight"]*(1-np.exp(-0.005*age_weeks))
+            base=cinfo["growth_rate"]
+            expected=cinfo["adult_weight"]*(1-np.exp(-0.005*age_weeks))
+
         wg=base*(0.5*(feed_cp/cp_req))*(0.3*(feed_energy/energy_req))
         st.metric("Daily gain",f"{wg:.1f} g/day")
         st.metric("Expected weight",f"{expected:.2f} kg")

@@ -1,0 +1,36 @@
+Ingredient,CP,Energy,Fiber,Cost
+Maize (Yellow),9.0,3350,2.5,450
+Maize (White),8.8,3320,2.6,440
+Sorghum (Guinea Corn),10.5,3250,2.8,420
+Millet,11.0,3200,3.5,400
+Wheat Offal,15.0,2650,9.5,320
+Soybean Meal (Full Fat),38.0,3400,6.0,1100
+Soybean Meal (Defatted),45.0,2230,6.0,950
+Groundnut Cake,45.0,2150,11.0,850
+Palm Kernel Cake,18.5,2100,14.5,380
+Cottonseed Cake,35.0,2150,12.0,680
+Sunflower Cake,28.0,2300,18.0,620
+Fishmeal (Local),65.0,2800,1.0,1800
+Fishmeal (Imported),68.0,2850,0.5,2200
+Blood Meal,80.0,2650,1.5,1500
+Feather Meal,85.0,2400,2.0,1300
+Bone Meal,24.0,1200,2.0,650
+Meat and Bone Meal,50.0,2300,3.0,1100
+Brewers Dried Grain,24.0,2000,21.0,300
+Rice Bran,13.0,2500,11.0,280
+Cassava Meal,2.5,3200,3.5,200
+Cassava Peels (Dried),4.0,2900,8.0,150
+Oyster Shell,0.0,0,0.0,120
+Limestone,0.0,0,0.0,45
+Di-Calcium Phosphate (DCP),0.0,0,0.0,580
+Salt,0.0,0,0.0,35
+Lysine,98.0,0,0.0,2200
+Methionine,99.0,0,0.0,2800
+Threonine,98.0,0,0.0,2500
+Tryptophan,98.0,0,0.0,3200
+Premix (Broiler),0.0,0,0.0,5000
+Premix (Layer),0.0,0,0.0,4800
+Vegetable Oil,0.0,8900,0.0,750
+Toxin Binder,0.0,0,0.0,1200
+Coccidiostat,0.0,0,0.0,1500
+Enzymes,0.0,0,0.0,2800

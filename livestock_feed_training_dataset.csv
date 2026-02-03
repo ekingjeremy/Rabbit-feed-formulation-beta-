@@ -1,0 +1,112 @@
+Animal_Type,Breed,Age_Weeks,Body_Weight_kg,CP_Requirement_%,Energy_Requirement_Kcal,Feed_Intake_kg,Ingredient_CP_%,Ingredient_Energy,Expected_Daily_Gain_g
+Rabbit,New Zealand White,8,1.8,18,2700,0.12,16.5,2650,22
+Rabbit,New Zealand White,12,2.5,16,2700,0.15,15.2,2600,18
+Rabbit,New Zealand White,16,3.2,15,2700,0.18,14.8,2580,15
+Rabbit,New Zealand White,20,3.8,14,2600,0.18,14.2,2550,12
+Rabbit,Californian,8,1.9,18,2700,0.13,16.8,2680,23
+Rabbit,Californian,12,2.6,16,2700,0.16,15.5,2620,19
+Rabbit,Californian,16,3.3,15,2700,0.18,14.9,2590,16
+Rabbit,Dutch,6,0.9,20,2750,0.08,18.2,2720,18
+Rabbit,Dutch,10,1.4,17,2700,0.10,16.0,2650,14
+Rabbit,Dutch,14,1.9,15,2650,0.12,14.5,2600,11
+Rabbit,Flemish Giant,10,2.8,18,2800,0.18,17.0,2720,28
+Rabbit,Flemish Giant,14,4.2,16,2800,0.22,15.8,2680,24
+Rabbit,Flemish Giant,18,5.5,15,2750,0.25,14.9,2640,20
+Rabbit,Chinchilla,8,1.7,18,2700,0.11,16.4,2660,20
+Rabbit,Chinchilla,12,2.3,16,2700,0.14,15.3,2610,17
+Rabbit,New Zealand White,4,1.0,20,2800,0.09,18.5,2750,25
+Rabbit,New Zealand White,24,4.2,14,2600,0.19,14.0,2540,10
+Rabbit,Californian,4,1.1,20,2800,0.10,18.7,2760,26
+Rabbit,Local (Nigerian),10,1.3,17,2650,0.11,15.8,2620,15
+Rabbit,Local (Nigerian),14,1.8,15,2650,0.13,14.6,2590,12
+Poultry,Broiler (Ross 308),2,0.35,23,3050,0.040,22.5,3100,35
+Poultry,Broiler (Ross 308),4,0.95,21,3150,0.085,20.8,3180,52
+Poultry,Broiler (Ross 308),6,1.85,19,3200,0.130,19.2,3220,58
+Poultry,Broiler (Ross 308),7,2.35,18,3200,0.155,18.5,3210,55
+Poultry,Broiler (Cobb 500),2,0.38,23,3050,0.042,22.7,3110,37
+Poultry,Broiler (Cobb 500),4,1.02,21,3150,0.088,20.9,3190,54
+Poultry,Broiler (Cobb 500),6,1.95,19,3200,0.135,19.3,3230,60
+Poultry,Broiler (Arbor Acres),3,0.65,22,3100,0.062,21.5,3150,45
+Poultry,Broiler (Arbor Acres),5,1.45,20,3175,0.108,19.8,3205,56
+Poultry,Broiler (Arbor Acres),7,2.45,18,3200,0.160,18.6,3215,56
+Poultry,Layer (ISA Brown),8,0.58,18,2800,0.055,17.5,2850,18
+Poultry,Layer (ISA Brown),12,1.05,17,2850,0.068,16.8,2880,22
+Poultry,Layer (ISA Brown),16,1.48,16,2900,0.080,16.2,2920,15
+Poultry,Layer (ISA Brown),20,1.75,18,2900,0.100,17.8,2950,8
+Poultry,Layer (Lohmann Brown),8,0.60,18,2800,0.057,17.6,2860,19
+Poultry,Layer (Lohmann Brown),12,1.08,17,2850,0.070,16.9,2890,23
+Poultry,Layer (Lohmann Brown),16,1.52,16,2900,0.082,16.3,2930,16
+Poultry,Layer (Hyline Brown),10,0.85,17,2825,0.062,17.2,2870,20
+Poultry,Layer (Hyline Brown),14,1.28,16,2875,0.075,16.5,2910,18
+Poultry,Layer (Hyline Brown),18,1.65,17,2900,0.095,17.5,2945,10
+Poultry,Broiler (Local),4,0.78,21,3100,0.072,20.5,3150,42
+Poultry,Broiler (Local),6,1.52,19,3175,0.115,19.0,3200,48
+Poultry,Layer (Local),12,0.92,17,2800,0.065,16.5,2850,18
+Poultry,Layer (Local),16,1.32,16,2875,0.078,16.0,2910,14
+Poultry,Cockerel (Local),8,1.15,19,2950,0.085,18.5,2980,28
+Poultry,Turkey (Bronze),8,2.85,24,2900,0.220,23.5,2950,65
+Poultry,Turkey (Bronze),12,5.20,20,3000,0.320,19.8,3050,75
+Poultry,Turkey (Bronze),16,8.50,18,3100,0.420,17.9,3140,70
+Poultry,Duck (Pekin),6,1.25,16,2850,0.105,15.8,2900,38
+Poultry,Duck (Pekin),10,2.45,15,2900,0.155,14.9,2950,32
+Cattle,White Fulani,52,185,12,2600,6.5,13.2,2650,450
+Cattle,White Fulani,78,265,11,2550,8.2,12.5,2620,380
+Cattle,White Fulani,104,340,10,2500,9.8,11.8,2590,320
+Cattle,White Fulani,130,405,10,2500,11.0,11.5,2580,280
+Cattle,Sokoto Gudali,52,195,12,2600,6.8,13.5,2660,470
+Cattle,Sokoto Gudali,78,280,11,2550,8.5,12.7,2630,400
+Cattle,Sokoto Gudali,104,360,10,2500,10.2,12.0,2600,340
+Cattle,Red Bororo,52,175,12,2600,6.2,13.0,2640,430
+Cattle,Red Bororo,78,250,11,2550,7.8,12.3,2610,360
+Cattle,Red Bororo,104,320,10,2500,9.5,11.6,2585,300
+Cattle,Muturu,52,75,11,2550,3.5,12.5,2610,180
+Cattle,Muturu,78,105,10,2500,4.2,11.8,2580,140
+Cattle,Muturu,104,130,10,2500,4.8,11.5,2570,110
+Cattle,Friesian (Dairy),26,180,14,2700,7.5,14.5,2750,550
+Cattle,Friesian (Dairy),52,320,13,2650,11.5,13.8,2710,480
+Cattle,Friesian (Dairy),78,450,12,2600,14.2,13.2,2680,420
+Cattle,Friesian (Dairy),104,550,11,2550,16.0,12.8,2660,350
+Cattle,Jersey (Dairy),26,150,14,2700,6.5,14.3,2740,480
+Cattle,Jersey (Dairy),52,265,13,2650,9.8,13.6,2700,420
+Cattle,Jersey (Dairy),78,360,12,2600,12.5,13.0,2670,360
+Cattle,Rahaji,60,210,12,2600,7.2,13.3,2655,460
+Cattle,Rahaji,90,310,11,2550,9.2,12.4,2615,370
+Cattle,Rahaji,120,395,10,2500,10.8,11.9,2595,310
+Cattle,N'Dama,52,165,12,2600,6.0,12.9,2635,410
+Cattle,N'Dama,78,235,11,2550,7.5,12.2,2605,340
+Cattle,N'Dama,104,300,10,2500,9.0,11.5,2580,280
+Cattle,Azawak,52,190,12,2600,6.6,13.4,2655,455
+Cattle,Azawak,78,270,11,2550,8.3,12.6,2625,390
+Cattle,Azawak,104,345,10,2500,10.0,11.9,2595,330
+Cattle,Kuri,52,200,12,2600,7.0,13.6,2665,485
+Cattle,Kuri,78,290,11,2550,8.8,12.8,2635,410
+Cattle,Kuri,104,370,10,2500,10.5,12.1,2605,350
+Cattle,Keteku,52,170,12,2600,6.1,13.0,2640,420
+Cattle,Keteku,78,245,11,2550,7.6,12.2,2610,350
+Cattle,Keteku,104,310,10,2500,9.2,11.6,2585,290
+Rabbit,New Zealand White,6,1.4,19,2750,0.10,17.2,2690,24
+Rabbit,Californian,10,2.2,17,2700,0.14,16.2,2640,21
+Rabbit,Dutch,8,1.2,18,2720,0.09,17.0,2680,16
+Rabbit,Flemish Giant,12,3.5,17,2780,0.20,16.5,2700,26
+Rabbit,Local (Nigerian),8,1.2,18,2680,0.10,16.2,2640,16
+Rabbit,Local (Nigerian),12,1.6,16,2650,0.12,15.0,2600,13
+Poultry,Broiler (Ross 308),3,0.62,22,3100,0.060,21.5,3150,48
+Poultry,Broiler (Ross 308),5,1.45,20,3175,0.110,19.5,3205,56
+Poultry,Broiler (Cobb 500),3,0.68,22,3100,0.063,21.6,3160,50
+Poultry,Broiler (Cobb 500),5,1.52,20,3175,0.115,19.6,3210,57
+Poultry,Layer (ISA Brown),10,0.75,17,2825,0.060,17.0,2870,20
+Poultry,Layer (ISA Brown),14,1.22,16,2875,0.072,16.4,2910,18
+Poultry,Layer (Lohmann Brown),10,0.78,17,2825,0.062,17.1,2875,21
+Poultry,Layer (Hyline Brown),12,1.05,17,2850,0.068,16.9,2890,22
+Poultry,Broiler (Local),5,1.18,20,3150,0.092,19.8,3180,46
+Poultry,Layer (Local),14,1.15,16,2850,0.070,16.2,2890,16
+Poultry,Turkey (Bronze),10,4.00,22,2950,0.270,21.5,3000,70
+Poultry,Duck (Pekin),8,1.85,15,2875,0.130,15.3,2925,35
+Cattle,White Fulani,65,225,11,2575,7.5,12.8,2635,420
+Cattle,Sokoto Gudali,65,238,11,2575,7.8,13.0,2645,440
+Cattle,Red Bororo,65,212,11,2575,7.2,12.6,2625,395
+Cattle,Friesian (Dairy),39,250,13,2675,9.5,14.0,2730,520
+Cattle,Jersey (Dairy),39,208,13,2675,8.2,13.8,2720,450
+Cattle,Rahaji,75,260,11,2575,8.0,12.7,2635,415
+Cattle,N'Dama,65,200,11,2575,6.8,12.5,2620,380
+Cattle,Azawak,65,230,11,2575,7.6,13.0,2640,425

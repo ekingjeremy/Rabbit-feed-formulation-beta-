@@ -1,0 +1,38 @@
+Ingredient,CP,Energy,Fiber,Cost
+Maize,9.0,3350,2.5,450
+Sorghum,10.5,3250,2.8,420
+Millet,11.0,3200,3.5,400
+Wheat Offal,15.0,2650,9.5,320
+Rice Bran,13.0,2500,11.0,280
+Soybean Meal,45.0,2230,6.0,950
+Groundnut Cake,45.0,2150,11.0,850
+Palm Kernel Cake,18.5,2100,14.5,380
+Cottonseed Cake,35.0,2150,12.0,680
+Brewers Dried Grain,24.0,2000,21.0,300
+Cassava Peels (Fresh),4.0,2900,15.0,80
+Cassava Chips,3.0,3100,4.0,180
+Cowpea Haulms,15.0,2200,24.0,100
+Groundnut Haulms,11.5,2150,26.0,90
+Guinea Grass (Hay),8.0,2100,32.0,120
+Elephant Grass (Hay),9.5,2200,34.0,110
+Panicum Maximum (Fresh),10.0,2300,30.0,60
+Cynodon Dactylon (Fresh),12.0,2350,28.0,65
+Leucaena Leaves,25.0,2400,15.0,95
+Gliricidia Leaves,23.0,2350,18.0,90
+Moringa Leaves,27.0,2350,12.0,180
+Sweet Potato Vines,14.0,2400,22.0,60
+Banana Leaves,12.0,2200,20.0,40
+Maize Stover,8.0,2000,35.0,70
+Rice Straw,5.0,1850,40.0,55
+Corn Silage,8.5,2800,25.0,200
+Fishmeal,65.0,2800,1.0,1800
+Blood Meal,80.0,2650,1.5,1500
+Bone Meal,24.0,1200,2.0,650
+Meat and Bone Meal,50.0,2300,3.0,1100
+Limestone,0.0,0,0.0,45
+Di-Calcium Phosphate,0.0,0,0.0,580
+Salt (Mineral Block),0.0,0,0.0,120
+Urea (Protein Supplement),280.0,0,0.0,450
+Molasses,4.0,2600,0.0,280
+Premix (Cattle),0.0,0,0.0,3800
+Vegetable Oil,0.0,8900,0.0,750

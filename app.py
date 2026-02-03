@@ -4,188 +4,143 @@ import numpy as np
 from pulp import LpProblem, LpMinimize, LpVariable, lpSum, LpStatus, value
 import plotly.express as px
 
-# ---------------- PAGE CONFIG ----------------
-st.set_page_config(page_title="🐄🐰🐔 Jeremiah's Nigerian Livestock Feed Optimizer", layout="wide")
+st.set_page_config(page_title="Livestock Feed Formulation System", layout="wide")
 
-# ---------------- INGREDIENT DATABASE ----------------
-@st.cache_data
-def load_ingredients():
+# ---------------- NAVIGATION ----------------
+page = st.sidebar.radio(
+    "Navigation",
+    ["🏠 Home", "🐰 Rabbit Feed Optimizer", "🐔 Poultry Feed Optimizer", "ℹ️ About"]
+)
+
+# ---------------- INGREDIENT DATABASE (GLOBAL) ----------------
+if "ingredient_data" not in st.session_state:
     data = {
         "Ingredient": [
-            "Maize (grain)","Soybean meal","Groundnut cake","Palm kernel cake","Wheat offal",
-            "Rice bran","Brewers dried grains","Fish meal","Bone meal","Limestone",
-            "Salt","Vitamin/Mineral premix","Methionine","Lysine",
-            "Alfalfa hay","Elephant grass","Guinea grass","Cowpea haulms","Napier grass","Maize silage","Hay (grass/legume)"
+            "Alfalfa","Elephant Grass","Gamba Grass","Guinea Grass","Centrosema",
+            "Stylosanthes","Leucaena","Gliricidia","Calliandra calothyrsus",
+            "Cowpea Fodder","Sorghum Fodder","Cassava Leaves","Napier Grass",
+            "Teff Grass","Faidherbia albida Pods",
+            "Maize","Soybean Meal","Groundnut Cake","Wheat Offal","Palm Kernel Cake",
+            "Brewer's Dry Grains","Cassava Peel","Maize Bran","Rice Bran",
+            "Cottonseed Cake","Fish Meal","Blood Meal","Feather Meal","Bone Meal",
+            "Limestone","Salt","Methionine","Lysine","Vitamin Premix"
         ],
-        "Category": [
-            "Concentrate","Concentrate","Concentrate","Concentrate","Concentrate",
-            "Concentrate","Concentrate","Concentrate","Mineral","Mineral",
-            "Mineral","Additive","Additive","Additive",
-            "Fodder","Fodder","Fodder","Fodder","Fodder","Fodder","Fodder"
-        ],
-        "CP (%)":[9,42,45,18,17,12,18,60,0,0,0,0,0,0,18,8,10,20,12,9,8],
-        "Energy (kcal/kg)":[3300,2700,2640,2175,1870,2860,1980,2800,0,0,0,0,0,0,2300,2200,2300,2100,2200,2000,1800],
-        "Fibre (%)":[3,6.5,6,15,10,12,20,1,0,0,0,0,0,0,25,32,28,18,30,28,35],
-        "Calcium (%)":[0.02,0.3,0.4,0.2,0.3,0.24,0.4,4,20,38,0,0,0,0,1.5,0.5,0.6,1.2,0.6,0.5,0.5],
-        "Cost (₦/kg)":[550,760,900,135,150,230,350,5000,295,155,65,1500,3100,2400,180,120,120,200,150,140,170]
+        "Category": ["Fodder"] * 15 + ["Concentrate"] * 14 + ["Mineral"] * 2 + ["Additive"] * 3,
+        "CP": [18,8,7,10,17,14,25,24,22,20,8,18,12,10,14,9,44,45,15,20,18,5,7,14,36,60,80,55,20,0,0,0,0,0],
+        "Energy": [2300,2200,2100,2300,2000,1900,2200,2300,2100,2200,2000,2100,2200,2000,1900,
+                   3400,3200,3000,1800,2200,2100,1900,2000,2200,2500,3000,2800,2700,2000,0,0,0,0,0],
+        "Fibre": [25,32,30,28,18,22,15,16,20,18,30,20,25,28,22,2,7,6,10,12,10,14,12,13,12,1,1,3,2,0,0,0,0,0],
+        "Calcium": [1.5,0.5,0.45,0.6,1.2,1.0,1.8,1.7,1.5,1.2,0.4,1.0,0.6,0.5,1.3,
+                    0.02,0.3,0.25,0.1,0.2,0.15,0.1,0.1,0.2,0.3,5.0,0.5,0.4,25.0,38.0,0,0,0,0],
+        "Cost": [80,50,45,55,70,65,90,85,88,75,40,60,58,50,60,120,150,130,90,100,110,45,55,65,140,200,170,180,160,50,30,500,500,400],
     }
-    df = pd.DataFrame(data)
-    df.set_index("Ingredient", inplace=True)
-    return df
+    st.session_state.ingredient_data = pd.DataFrame(data).set_index("Ingredient")
 
-df = load_ingredients()
+df = st.session_state.ingredient_data.copy()
 
-# ---------------- SPECIES DATABASES ----------------
-rabbit_breeds = {
-    "New Zealand White": {"adult_weight": 4.5, "growth_rate": 35, "cp_need": 16},
-    "Californian": {"adult_weight": 4.0, "growth_rate": 32, "cp_need": 16},
-    "Chinchilla": {"adult_weight": 3.5, "growth_rate": 28, "cp_need": 15},
-    "Flemish Giant": {"adult_weight": 6.5, "growth_rate": 40, "cp_need": 17},
-    "Dutch": {"adult_weight": 2.5, "growth_rate": 20, "cp_need": 15},
-    "Local Nigerian": {"adult_weight": 2.8, "growth_rate": 18, "cp_need": 14}
-}
+# ================= HOME PAGE =================
+if page == "🏠 Home":
+    st.title("Smart Livestock Feed Formulation System")
 
-poultry_types = {
-    "Broiler Starter": {"CP": 22, "Energy": 2900},
-    "Broiler Grower": {"CP": 19, "Energy": 3000},
-    "Broiler Finisher": {"CP": 17, "Energy": 3000},
-    "Layer Starter": {"CP": 20, "Energy": 2800},
-    "Layer Grower": {"CP": 17, "Energy": 2800},
-    "Layer Production": {"CP": 16, "Energy": 2600},
-}
+    st.markdown("""
+    This platform helps farmers formulate **cost-effective, nutritionally balanced feeds**
+    for livestock production in Nigeria using optimization and growth modeling.
 
-cattle_types = {
-    "Dairy Cow": {"CP": 14, "Energy": 2500, "Fibre": 30, "adult_weight": 450, "growth_rate": 800},
-    "Beef Cattle": {"CP": 13, "Energy": 2400, "Fibre": 32, "adult_weight": 400, "growth_rate": 700},
-}
+    ### Goals
+    - Reduce feed cost  
+    - Improve animal performance  
+    - Use local ingredients efficiently  
 
-# ---------------- LANDING PAGE ----------------
-st.title("🐄🐰🐔 Nigerian Livestock Feed Formulator")
-st.markdown("""
-This app allows you to **formulate feed for Rabbits, Poultry, and Cattle** using Nigerian ingredients.
-You can select **Concentrate vs Fodder**, edit ingredient prices, and see **growth predictions**.
-""")
+    ### Features
+    - AI-based feed formulation  
+    - Growth prediction  
+    - Ingredient editing  
+    - Cost optimization  
 
-animal_choice = st.selectbox("Select an animal to formulate feed for:", ["Rabbit", "Poultry", "Cattle"])
+    **Use the menu to begin.**
+    """)
 
-# ---------------- CREATE TABS ----------------
-tab1, tab2, tab3 = st.tabs(["Feed Optimizer", "Manage Ingredients", "Growth Prediction"])
+# ================= RABBIT SECTION =================
+elif page == "🐰 Rabbit Feed Optimizer":
 
-# ---------------- SIDEBAR SETTINGS ----------------
-with st.sidebar:
-    st.header("Feed Settings")
-    ration_type = st.selectbox("Ration Type", ["Mixed (Fodder+Concentrate)","Concentrate only","Fodder only"])
-    
-    if animal_choice=="Rabbit":
-        breed = st.selectbox("Rabbit Breed", list(rabbit_breeds.keys()))
+    st.title("Rabbit Feed Formulation Optimizer")
+
+    breed_data = {
+        "New Zealand White": {"adult_weight": 4.5, "growth_rate": 35, "cp_need": 16},
+        "Californian": {"adult_weight": 4.0, "growth_rate": 32, "cp_need": 16},
+        "Chinchilla": {"adult_weight": 3.5, "growth_rate": 28, "cp_need": 15},
+        "Flemish Giant": {"adult_weight": 6.5, "growth_rate": 40, "cp_need": 17},
+        "Dutch": {"adult_weight": 2.5, "growth_rate": 20, "cp_need": 15},
+        "Local Nigerian Breed": {"adult_weight": 2.8, "growth_rate": 18, "cp_need": 14}
+    }
+
+    with st.sidebar:
+        selected_breed = st.selectbox("Breed", list(breed_data.keys()))
         age_weeks = st.slider("Age (weeks)", 4, 52, 12)
-        binfo = rabbit_breeds[breed]
-        cp_req = st.slider("Crude Protein (%)",10,50,binfo["cp_need"])
-        energy_req = st.slider("Energy (kcal/kg)",1500,3500,2500)
-        fibre_req = st.slider("Fibre (%)",5,40,12)
-        calcium_req = st.slider("Calcium (%)",0.1,5.0,0.5)
-    elif animal_choice=="Poultry":
-        ptype = st.selectbox("Poultry Type", list(poultry_types.keys()))
-        pinfo = poultry_types[ptype]
-        cp_req = st.slider("Crude Protein (%)",15,30,pinfo["CP"])
-        energy_req = st.slider("Energy (kcal/kg)",2500,3500,pinfo["Energy"])
-        fibre_req = st.slider("Fibre (%)",0,10,5)
-        calcium_req = st.slider("Calcium (%)",0.5,4.0,1.0)
-        age_weeks = 12
-    else:
-        ctype = st.selectbox("Cattle Type", list(cattle_types.keys()))
-        cinfo = cattle_types[ctype]
-        cp_req = st.slider("Crude Protein (%)",10,20,cinfo["CP"])
-        energy_req = st.slider("Energy (kcal/kg)",2000,3000,cinfo["Energy"])
-        fibre_req = st.slider("Fibre (%)",25,40,cinfo["Fibre"])
-        calcium_req = st.slider("Calcium (%)",0.1,4.0,1.0)
-        age_weeks = st.slider("Age (weeks)",1,104,52)
+        breed_info = breed_data[selected_breed]
+        cp_req = st.slider("Crude Protein (%)", 10, 50, breed_info["cp_need"])
+        energy_req = st.slider("Energy (Kcal/kg)", 1500, 3500, 2500)
+        fibre_req = st.slider("Fibre (%)", 5, 40, 12)
+        calcium_req = st.slider("Calcium (%)", 0.1, 5.0, 0.5)
 
-# ---------------- FILTER INGREDIENTS ----------------
-if ration_type=="Concentrate only":
-    ingredients=df[df['Category'].isin(["Concentrate","Additive","Mineral"])]
-elif ration_type=="Fodder only":
-    ingredients=df[df['Category']=="Fodder"]
-else:
-    ingredients=df[df['Category'].isin(["Fodder","Concentrate","Additive","Mineral"])]
+    ingredients = df[df["Category"].isin(["Fodder","Concentrate"])]
 
-# ---------------- FEED OPTIMIZER ----------------
-with tab1:
-    st.header(f"🔬 {animal_choice} Feed Optimizer")
-    model = LpProblem("FeedOptimization", LpMinimize)
-    vars = {i: LpVariable(i,lowBound=0) for i in ingredients.index}
+    model = LpProblem("RabbitFeed", LpMinimize)
+    vars = {i: LpVariable(i, lowBound=0) for i in ingredients.index}
 
-    # Objective: minimize cost
-    model += lpSum(vars[i]*ingredients.loc[i,"Cost (₦/kg)"] for i in ingredients.index)
-    
-    # Total proportion = 1
-    model += lpSum(vars[i] for i in ingredients.index)==1
-    
-    # Nutrient constraints
-    model += lpSum(vars[i]*ingredients.loc[i,"CP (%)"] for i in ingredients.index)>=cp_req
-    model += lpSum(vars[i]*ingredients.loc[i,"Energy (kcal/kg)"] for i in ingredients.index)>=energy_req
-    model += lpSum(vars[i]*ingredients.loc[i,"Fibre (%)"] for i in ingredients.index)>=fibre_req
-    model += lpSum(vars[i]*ingredients.loc[i,"Calcium (%)"] for i in ingredients.index)>=calcium_req
+    model += lpSum(vars[i] * ingredients.loc[i, 'Cost'] for i in ingredients.index)
+    model += lpSum(vars[i] for i in ingredients.index) == 1
+    model += lpSum(vars[i] * ingredients.loc[i, 'CP'] for i in ingredients.index) >= cp_req
+    model += lpSum(vars[i] * ingredients.loc[i, 'Energy'] for i in ingredients.index) >= energy_req
+    model += lpSum(vars[i] * ingredients.loc[i, 'Fibre'] for i in ingredients.index) >= fibre_req
+    model += lpSum(vars[i] * ingredients.loc[i, 'Calcium'] for i in ingredients.index) >= calcium_req
 
-    # Limits for minerals and additives
-    for i in ingredients.index:
-        if ingredients.loc[i,"Category"]=="Mineral":
-            model += vars[i]<=0.05
-        elif ingredients.loc[i,"Category"]=="Additive":
-            model += vars[i]<=0.02
-        elif ingredients.loc[i,"Category"]=="Concentrate":
-            model += vars[i]<=0.6
-
-    # Solve
     model.solve()
 
-    if LpStatus[model.status]=="Optimal":
-        res={i: vars[i].varValue for i in ingredients.index if vars[i].varValue>0.0001}
-        res_df=pd.DataFrame.from_dict(res,orient="index",columns=["Proportion (kg)"])
-        res_df["Cost (₦)"]=res_df["Proportion (kg)"]*ingredients.loc[res_df.index,"Cost (₦/kg)"]
-        st.dataframe(res_df)
-        st.write(f"**💸 Cost/kg Feed: ₦{value(model.objective):.2f}**")
-        st.plotly_chart(px.pie(res_df,values="Proportion (kg)",names=res_df.index))
-        csv=res_df.to_csv().encode('utf-8')
-        st.download_button("💾 Download CSV",data=csv,file_name=f"{animal_choice}_feed.csv",mime="text/csv")
-    else:
-        st.error("No feasible solution with current constraints.")
+    if LpStatus[model.status] == "Optimal":
+        results = {i: vars[i].varValue for i in ingredients.index if vars[i].varValue > 0.001}
+        result_df = pd.DataFrame.from_dict(results, orient='index', columns=['Proportion'])
+        st.dataframe(result_df)
+        st.plotly_chart(px.pie(result_df, values='Proportion', names=result_df.index))
 
-# ---------------- INGREDIENTS MANAGEMENT ----------------
-with tab2:
-    st.header("📋 Edit Ingredients")
-    editable = ingredients.reset_index()
-    edited = st.data_editor(editable,num_rows="dynamic",use_container_width=True)
-    uploaded = st.file_uploader("Upload CSV to add ingredients", type=["csv"])
-    if uploaded:
-        new = pd.read_csv(uploaded).set_index("Ingredient")
-        df = pd.concat([df,new])
-        st.success("New ingredients added!")
-    if st.button("💾 Save Edited"):
-        df.update(edited.set_index("Ingredient"))
-        st.success("Ingredients saved!")
+# ================= POULTRY SECTION =================
+elif page == "🐔 Poultry Feed Optimizer":
 
-# ---------------- GROWTH PREDICTION ----------------
-with tab3:
-    st.header("📈 Growth Prediction")
-    if LpStatus[model.status]=="Optimal":
-        props=np.array([vars[i].varValue for i in ingredients.index])
-        cpvals=np.array([ingredients.loc[i,"CP (%)"] for i in ingredients.index])
-        enervals=np.array([ingredients.loc[i,"Energy (kcal/kg)"] for i in ingredients.index])
-        feed_cp=np.dot(props,cpvals)
-        feed_energy=np.dot(props,enervals)
+    st.title("Poultry Feed Formulation Optimizer")
 
-        if animal_choice=="Rabbit":
-            base=binfo["growth_rate"]
-            expected=binfo["adult_weight"]*(1-np.exp(-0.08*age_weeks))
-        elif animal_choice=="Poultry":
-            base=50  # simplified
-            expected=2.5
-        else:
-            base=cinfo["growth_rate"]
-            expected=cinfo["adult_weight"]*(1-np.exp(-0.005*age_weeks))
+    poultry_data = {
+        "Broiler Starter": {"cp": 22, "energy": 3000},
+        "Broiler Finisher": {"cp": 20, "energy": 3200},
+        "Layer Grower": {"cp": 16, "energy": 2700},
+        "Layer Layer": {"cp": 17, "energy": 2800}
+    }
 
-        wg=base*(0.5*(feed_cp/cp_req))*(0.3*(feed_energy/energy_req))
-        st.metric("Daily gain",f"{wg:.1f} g/day")
-        st.metric("Expected weight",f"{expected:.2f} kg")
+    with st.sidebar:
+        bird = st.selectbox("Stage", list(poultry_data.keys()))
+        cp_req = st.slider("Crude Protein (%)", 14, 26, poultry_data[bird]["cp"])
+        energy_req = st.slider("Energy (Kcal/kg)", 2500, 3300, poultry_data[bird]["energy"])
+        fibre_req = st.slider("Fibre (%)", 2, 10, 5)
+        calcium_req = st.slider("Calcium (%)", 0.5, 4.0, 1.0)
 
+    ingredients = df
+
+    model = LpProblem("PoultryFeed", LpMinimize)
+    vars = {i: LpVariable(i, lowBound=0) for i in ingredients.index}
+
+    model += lpSum(vars[i] * ingredients.loc[i, 'Cost'] for i in ingredients.index)
+    model += lpSum(vars[i] for i in ingredients.index) == 1
+    model += lpSum(vars[i] * ingredients.loc[i, 'CP'] for i in ingredients.index) >= cp_req
+    model += lpSum(vars[i] * ingredients.loc[i, 'Energy'] for i in ingredients.index) >= energy_req
+    model += lpSum(vars[i] * ingredients.loc[i, 'Fibre'] for i in ingredients.index) >= fibre_req
+    model += lpSum(vars[i] * ingredients.loc[i, 'Calcium'] for i in ingredients.index) >= calcium_req
+
+    model.solve()
+
+    if LpStatus[model.status] == "Optimal":
+        results = {i: vars[i].varValue for i in ingredients.index if vars[i].varValue > 0.001}
+        st.dataframe(pd.DataFrame.from_dict(results, orient='index', columns=['Proportion']))
+
+# ================= ABOUT =================
+elif page == "ℹ️ About":
+    st.title("About This System")
+    st.markdown("Built for farmers, researchers, and feed producers to optimize livestock nutrition.")

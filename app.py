@@ -1,135 +1,66 @@
-# ---------------------- IMPORTS ----------------------
 import streamlit as st
 import pandas as pd
 import numpy as np
 from pulp import LpProblem, LpMinimize, LpVariable, lpSum, LpStatus, value
 import plotly.express as px
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-import xgboost as xgb
 from PIL import Image
 
-# ---------------------- PAGE CONFIG ----------------------
-st.set_page_config(
-    page_title="🌾 Global Feed Formulation Optimizer",
-    page_icon="🌾",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="🐮🐔🐰 Nigerian Livestock Feed Formulator", layout="wide")
 
-# ---------------------- LANDING PAGE ----------------------
+# ---------------- LANDING PAGE ----------------
 with st.container():
-    st.markdown("<h1 style='text-align: center; color: #2E86C1;'>🌾 Global Feed Formulation Optimizer</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center; color: #117A65;'>Optimizing Rabbit, Poultry, and Cattle Feed Worldwide</h3>", unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
+    st.title("🐮🐔🐰 Nigerian Livestock Feed Formulator")
+    st.subheader("Optimize feed formulations for Rabbit, Poultry, and Cattle")
     st.markdown("""
-    **Welcome!**  
-    This application assists farmers, researchers, and nutritionists in formulating **cost-effective and nutritionally balanced feeds** for **Rabbits, Poultry, and Cattle**. Using this app, you can:
-    - Optimize feed composition based on **Crude Protein, Energy, Fibre, and Calcium**.
-    - Adjust for **different breeds, ages, and production stages**.
-    - Predict **growth and expected body weight**.
-    - Edit and upload ingredients from your local or research database.
+    Welcome! This app is designed to help farmers, researchers, and enthusiasts optimize livestock feed 
+    based on nutritional requirements and cost. You can select the animal species, breed, and age, 
+    adjust nutrient sliders, and get an optimized feed mixture along with growth predictions.
+    
+    Features:
+    - Feed Mix Optimization for Rabbit, Poultry, and Cattle
+    - Editable Ingredient Database with local & global options
+    - Upload and manage your own ingredient CSV
+    - Growth Prediction Metrics
+    - Interactive Pie Charts of feed composition
     """)
-    
     st.markdown("---")
-    
-    st.markdown("<h2 style='text-align: center; color: #D68910;'>🎯 Goals and Objectives</h2>", unsafe_allow_html=True)
-    
-    st.markdown("""
-    - **Streamline feed formulation** using linear programming for cost efficiency.  
-    - **Provide research-ready tools** for experimental feed trials worldwide.  
-    - **Facilitate data-driven decision-making** for farmers and nutritionists.  
-    - **Allow ingredient flexibility**, supporting local and international feed components.  
-    - **Predict animal growth** based on optimized nutrient intake.  
-    """)
-    
-    st.markdown("---")
-    
-    st.markdown("<h2 style='text-align: center; color: #C0392B;'>🚀 Key Features</h2>", unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("### 🔬 Feed Optimizer")
-        st.image("https://cdn-icons-png.flaticon.com/512/2910/2910761.png", width=100)
-        st.write("Optimize feed mixes based on your selected species, breed, and production stage for maximum efficiency and minimum cost.")
-        
-    with col2:
-        st.markdown("### 📋 Ingredient Management")
-        st.image("https://cdn-icons-png.flaticon.com/512/2501/2501651.png", width=100)
-        st.write("Edit ingredient properties, upload new ingredients, and create feeds using both local and international databases.")
-    
-    with col3:
-        st.markdown("### 📈 Growth Prediction")
-        st.image("https://cdn-icons-png.flaticon.com/512/2910/2910753.png", width=100)
-        st.write("Predict expected body weight and growth based on optimized feed formulations for research or farm management.")
-    
-    st.markdown("---")
-    st.markdown("**Scroll down to start formulating feeds for Rabbits, Poultry, and Cattle!**")
 
-# ---------------------- SIDEBAR ----------------------
+# ---------------- SPECIES DATABASE ----------------
+species_data = {
+    "Rabbit": {
+        "New Zealand White": {"adult_weight": 4.5, "growth_rate": 35, "cp_need": 16},
+        "Californian": {"adult_weight": 4.0, "growth_rate": 32, "cp_need": 16},
+        "Chinchilla": {"adult_weight": 3.5, "growth_rate": 28, "cp_need": 15},
+        "Flemish Giant": {"adult_weight": 6.5, "growth_rate": 40, "cp_need": 17},
+        "Dutch": {"adult_weight": 2.5, "growth_rate": 20, "cp_need": 15},
+        "Local Nigerian Breed": {"adult_weight": 2.8, "growth_rate": 18, "cp_need": 14}
+    },
+    "Poultry": {
+        "Broiler": {"adult_weight": 2.5, "growth_rate": 60, "cp_need": 22},
+        "Layer": {"adult_weight": 1.8, "growth_rate": 30, "cp_need": 18},
+        "Local Nigerian Breed": {"adult_weight": 1.5, "growth_rate": 28, "cp_need": 20}
+    },
+    "Cattle": {
+        "Bunaji": {"adult_weight": 400, "growth_rate": 700, "cp_need": 12},
+        "Rahaji": {"adult_weight": 350, "growth_rate": 650, "cp_need": 12},
+        "Futa": {"adult_weight": 300, "growth_rate": 550, "cp_need": 11}
+    }
+}
+
+# ---------------- SIDEBAR ----------------
 with st.sidebar:
-    st.title("Feed Formulation Optimizer")
-    animal_type = st.selectbox("Select Animal Type", ["Rabbit", "Poultry", "Cattle"])
+    st.title("Select Livestock")
+    species = st.selectbox("Animal Species", list(species_data.keys()))
+    breed = st.selectbox("Select Breed", list(species_data[species].keys()))
+    age_weeks = st.slider("Age (weeks)", 1, 52, 12)
+    breed_info = species_data[species][breed]
 
-    if animal_type == "Rabbit":
-        breed_data = {
-            "New Zealand White": {"adult_weight": 4.5, "growth_rate": 35, "cp_need": 16},
-            "Californian": {"adult_weight": 4.0, "growth_rate": 32, "cp_need": 16},
-            "Chinchilla": {"adult_weight": 3.5, "growth_rate": 28, "cp_need": 15},
-            "Flemish Giant": {"adult_weight": 6.5, "growth_rate": 40, "cp_need": 17},
-            "Dutch": {"adult_weight": 2.5, "growth_rate": 20, "cp_need": 15},
-            "Local Nigerian Breed": {"adult_weight": 2.8, "growth_rate": 18, "cp_need": 14}
-        }
-        selected_breed = st.selectbox("Select Rabbit Breed", list(breed_data.keys()))
-        age_weeks = st.slider("Age (weeks)", 4, 52, 12)
-        breed_info = breed_data[selected_breed]
-
-        st.markdown("---")
-        st.subheader("Nutrient Requirements")
-        cp_req = st.slider("Crude Protein (%)", 10, 50, int(breed_info["cp_need"]))
-        energy_req = st.slider("Energy (Kcal/kg)", 1500, 3500, 2500)
-        fibre_req = st.slider("Fibre (%)", 5, 40, 12)
-        calcium_req = st.slider("Calcium (%)", 0.1, 5.0, 0.5)
-
-    elif animal_type == "Poultry":
-        breed_data = {
-            "Broiler Starter": {"age_days": 1, "cp": 22, "energy": 3000},
-            "Broiler Grower": {"age_days": 15, "cp": 20, "energy": 3100},
-            "Broiler Finisher": {"age_days": 28, "cp": 18, "energy": 3200},
-            "Layer Starter": {"age_days": 1, "cp": 20, "energy": 2800},
-            "Layer Grower": {"age_days": 14, "cp": 18, "energy": 2900},
-            "Layer Layering": {"age_days": 18, "cp": 17, "energy": 2800},
-        }
-        selected_breed = st.selectbox("Select Poultry Type", list(breed_data.keys()))
-        age_days = st.slider("Age (days)", 1, 42, 14)
-        breed_info = breed_data[selected_breed]
-
-        st.markdown("---")
-        st.subheader("Nutrient Requirements")
-        cp_req = st.slider("Crude Protein (%)", 15, 25, int(breed_info["cp"]))
-        energy_req = st.slider("Energy (Kcal/kg)", 2500, 3500, int(breed_info["energy"]))
-        fibre_req = st.slider("Fibre (%)", 5, 10, 7)
-        calcium_req = st.slider("Calcium (%)", 0.5, 4.0, 1.0)
-
-    else:
-        breed_data = {
-            "Nigerian Zebu": {"adult_weight": 350, "growth_rate": 0.6, "cp_need": 12},
-            "White Fulani": {"adult_weight": 400, "growth_rate": 0.5, "cp_need": 11},
-            "Bunaji": {"adult_weight": 380, "growth_rate": 0.55, "cp_need": 12}
-        }
-        selected_breed = st.selectbox("Select Cattle Breed", list(breed_data.keys()))
-        age_months = st.slider("Age (months)", 1, 24, 6)
-        breed_info = breed_data[selected_breed]
-
-        st.markdown("---")
-        st.subheader("Nutrient Requirements")
-        cp_req = st.slider("Crude Protein (%)", 8, 16, int(breed_info["cp_need"]))
-        energy_req = st.slider("Energy (Kcal/kg)", 1500, 3000, 2500)
-        fibre_req = st.slider("Fibre (%)", 10, 40, 20)
-        calcium_req = st.slider("Calcium (%)", 0.2, 3.0, 0.5)
+    st.markdown("---")
+    st.subheader("📋 Nutrient Requirements")
+    cp_req = st.slider("Crude Protein (%)", 5, 50, int(breed_info["cp_need"]))
+    energy_req = st.slider("Energy (Kcal/kg)", 1500, 4000, 2500)
+    fibre_req = st.slider("Fibre (%)", 0, 40, 12)
+    calcium_req = st.slider("Calcium (%)", 0.1, 5.0, 0.5)
 
     st.markdown("---")
     ration_type = st.selectbox(
@@ -137,7 +68,7 @@ with st.sidebar:
         ["Mixed (Fodder + Concentrate)", "Concentrate only", "Fodder only"]
     )
 
-# ---------------------- INGREDIENT DATABASE ----------------------
+# ---------------- INGREDIENT DATABASE ----------------
 if "ingredient_data" not in st.session_state:
     data = {
         "Ingredient": [
@@ -162,9 +93,9 @@ if "ingredient_data" not in st.session_state:
     df = pd.DataFrame(data).set_index("Ingredient")
     st.session_state.ingredient_data = df.copy()
 else:
-    df = st.session_state.ingredient_data.copy()
+    df = st.session_state.ingredient_data
 
-# ---------------------- FILTER INGREDIENTS BY RATION TYPE ----------------------
+# ---------------- FILTER INGREDIENTS BY RATION TYPE ----------------
 if ration_type == "Concentrate only":
     ingredients = df[df['Category'] == "Concentrate"]
 elif ration_type == "Fodder only":
@@ -172,10 +103,10 @@ elif ration_type == "Fodder only":
 else:
     ingredients = df[df['Category'].isin(["Fodder", "Concentrate"])]
 
-# ---------------------- TABS ----------------------
+# ---------------- TABS ----------------
 tab1, tab2, tab3 = st.tabs(["🔬 Optimizer", "📋 Ingredients", "📈 Prediction"])
 
-# ---------------------- OPTIMIZER ----------------------
+# ---------------- OPTIMIZER ----------------
 with tab1:
     st.header("🔬 Feed Mix Optimizer")
     model = LpProblem("Feed_Optimization", LpMinimize)
@@ -210,14 +141,13 @@ with tab1:
     else:
         st.error("No feasible solution found.")
 
-# ---------------------- INGREDIENTS TAB ----------------------
+# ---------------- INGREDIENTS TAB ----------------
 with tab2:
     st.header("📋 Manage Ingredients")
     editable_df = df.reset_index()
     edited_df = st.data_editor(editable_df, num_rows="dynamic", use_container_width=True)
 
-    st.subheader("📤 Upload New Ingredients CSV")
-    uploaded_file = st.file_uploader("Upload CSV with columns: Ingredient, Category, CP, Energy, Fibre, Calcium, Cost", type=["csv"])
+    uploaded_file = st.file_uploader("Upload CSV (Ingredient, Category, CP, Energy, Fibre, Calcium, Cost)", type=["csv"])
     if uploaded_file:
         new_ingredients = pd.read_csv(uploaded_file)
         required_cols = {"Ingredient", "Category", "CP", "Energy", "Fibre", "Calcium", "Cost"}
@@ -225,9 +155,9 @@ with tab2:
             new_ingredients = new_ingredients.set_index("Ingredient")
             st.session_state.ingredient_data = pd.concat([st.session_state.ingredient_data, new_ingredients])
             df = st.session_state.ingredient_data.copy()
-            st.success(f"✅ Successfully added {len(new_ingredients)} new ingredients.")
+            st.success(f"✅ Added {len(new_ingredients)} ingredients")
         else:
-            st.error("❌ CSV must contain all required columns.")
+            st.error("❌ CSV missing required columns")
 
     if st.button("💾 Save Changes"):
         if edited_df["Ingredient"].is_unique and edited_df["Ingredient"].notnull().all():
@@ -237,7 +167,7 @@ with tab2:
         else:
             st.error("❌ All ingredient names must be unique and non-empty.")
 
-# ---------------------- GROWTH PREDICTION ----------------------
+# ---------------- GROWTH PREDICTION ----------------
 with tab3:
     st.header("📈 Growth Prediction")
     if LpStatus[model.status] == "Optimal":
@@ -248,19 +178,14 @@ with tab3:
         feed_cp = np.dot(proportions, cp_vals)
         feed_energy = np.dot(proportions, energy_vals)
 
-        # Different formulas for each species
-        if animal_type == "Rabbit":
-            base_growth = breed_info["growth_rate"]
-            weight_gain = base_growth * (0.5 * (feed_cp / cp_req)) * (0.3 * (feed_energy / energy_req))
-            expected_weight = breed_info["adult_weight"] * (1 - np.exp(-0.08 * age_weeks))
-        elif animal_type == "Poultry":
-            base_growth = 50  # g/day baseline
-            weight_gain = base_growth * (0.5 * (feed_cp / cp_req)) * (0.3 * (feed_energy / energy_req))
-            expected_weight = base_growth * age_days  # simple cumulative weight approximation
+        base_growth = breed_info["growth_rate"]
+        weight_gain = base_growth * (0.5 * (feed_cp / cp_req)) * (0.3 * (feed_energy / energy_req))
+        # Convert expected weight to grams for rabbits & poultry, keep kg for cattle
+        if species in ["Rabbit", "Poultry"]:
+            expected_weight = breed_info["adult_weight"] * 1000 * (1 - np.exp(-0.08 * age_weeks))  # grams
+            st.metric("📈 Expected Weight Gain (g/day)", f"{weight_gain:.2f}")
+            st.metric("⚖️ Expected Body Weight (g)", f"{expected_weight:.2f}")
         else:
-            base_growth = breed_info["growth_rate"] * 1000  # kg to g/day approx
-            weight_gain = base_growth * (0.5 * (feed_cp / cp_req)) * (0.3 * (feed_energy / energy_req))
-            expected_weight = (breed_info["adult_weight"] * 1000) * (1 - np.exp(-0.04 * age_months))
-
-        st.metric("📈 Expected Weight Gain (g/day)", f"{weight_gain:.2f}")
-        st.metric("⚖️ Expected Body Weight (g)", f"{expected_weight:.2f}")
+            expected_weight = breed_info["adult_weight"] * (1 - np.exp(-0.08 * age_weeks))  # kg
+            st.metric("📈 Expected Weight Gain (kg/day)", f"{weight_gain:.2f}")
+            st.metric("⚖️ Expected Body Weight (kg)", f"{expected_weight:.2f}")

@@ -3,100 +3,134 @@ import pandas as pd
 import numpy as np
 from pulp import LpProblem, LpMinimize, LpVariable, lpSum, LpStatus, value
 import plotly.express as px
+from sklearn.ensemble import RandomForestRegressor
 
-st.set_page_config(page_title="🌍 Livestock Feed AI Formulator", layout="wide")
+st.set_page_config(page_title="🌍 AI Livestock Feed Formulator", layout="wide")
 
-# ---------------- LOAD DATA ----------------
-rabbit_df = pd.read_csv("nigeria_rabbit_breeds.csv")
-poultry_df = pd.read_csv("nigeria_poultry_breeds.csv")
-cattle_df = pd.read_csv("nigeria_cattle_breeds.csv")
-ingredients_df = pd.read_csv("nigeria_feed_ingredients.csv")
+# =====================================================
+# LOAD DATA
+# =====================================================
+@st.cache_data
+def load_data():
+    rabbit = pd.read_csv("rabbit_ingredients.csv")
+    poultry = pd.read_csv("poultry_ingredients.csv")
+    cattle = pd.read_csv("cattle_ingredients.csv")
+    ml_data = pd.read_csv("livestock_feed_training_dataset.csv")
+    return rabbit, poultry, cattle, ml_data
 
-# ---------------- SIDEBAR ----------------
-with st.sidebar:
-    st.title("🌍 Smart Livestock Feed Formulator")
+rabbit_df, poultry_df, cattle_df, ml_df = load_data()
 
-    animal_type = st.selectbox("Select Animal", ["Rabbit", "Poultry", "Cattle"])
+# =====================================================
+# TRAIN AI MODEL
+# =====================================================
+@st.cache_resource
+def train_model(data):
+    X = data[[
+        "Age_Weeks", "Body_Weight_kg",
+        "CP_Requirement_%", "Energy_Requirement_Kcal",
+        "Feed_Intake_kg", "Ingredient_CP_%", "Ingredient_Energy"
+    ]]
+    y = data["Expected_Daily_Gain_g"]
+    model = RandomForestRegressor(n_estimators=200, random_state=42)
+    model.fit(X, y)
+    return model
 
-    if animal_type == "Rabbit":
-        breed_data = rabbit_df
-    elif animal_type == "Poultry":
-        breed_data = poultry_df
-    else:
-        breed_data = cattle_df
+model = train_model(ml_df)
 
-    selected_breed = st.selectbox("Select Breed", breed_data["Breed"].unique())
-    breed_info = breed_data[breed_data["Breed"] == selected_breed].iloc[0]
+# =====================================================
+# LANDING PAGE
+# =====================================================
+st.title("🌍 Intelligent Livestock Feed Formulator")
+st.markdown("""
+AI-powered nutrition platform for **Rabbits, Poultry, and Cattle**.
 
-    age_weeks = st.slider("Age (weeks)", 1, 104, 12)
+✔ Least-cost feed formulation  
+✔ Ingredient database  
+✔ AI growth prediction  
+✔ Research & farm use  
+✔ Works for Nigeria & globally  
+""")
 
-    st.markdown("---")
-    st.subheader("📋 Nutrient Requirements")
-    cp_req = st.slider("Crude Protein (%)", 10, 30, int(breed_info["CP_%"]))
-    energy_req = st.slider("Energy (Kcal/kg)", 1500, 3500, 2500)
-    fibre_req = st.slider("Fibre (%)", 5, 40, 12)
-    calcium_req = st.slider("Calcium (%)", 0.1, 5.0, 0.5)
+# =====================================================
+# ANIMAL SELECTION
+# =====================================================
+animal = st.selectbox("Select Animal Type", ["Rabbit", "Poultry", "Cattle"])
 
-# ---------------- FILTER INGREDIENTS ----------------
-ingredients = ingredients_df[
-    ingredients_df["Animal_Use"].str.contains(animal_type, case=False) |
-    ingredients_df["Animal_Use"].str.contains("All", case=False)
-]
+if animal == "Rabbit":
+    df = rabbit_df.copy()
+elif animal == "Poultry":
+    df = poultry_df.copy()
+else:
+    df = cattle_df.copy()
 
-ingredients = ingredients.set_index("Ingredient")
+# =====================================================
+# SIDEBAR INPUTS
+# =====================================================
+st.sidebar.header("Animal Parameters")
 
-# ---------------- TABS ----------------
-tab1, tab2, tab3 = st.tabs(["🔬 Optimizer", "📋 Ingredients", "📈 Prediction"])
+age = st.sidebar.slider("Age (weeks)", 1, 120, 8)
+weight = st.sidebar.slider("Body Weight (kg)", 0.1, 600.0, 2.0)
+cp_req = st.sidebar.slider("Crude Protein Requirement (%)", 10, 30, 18)
+energy_req = st.sidebar.slider("Energy Requirement (Kcal/kg)", 2000, 12000, 3000)
+feed_intake = st.sidebar.slider("Feed Intake (kg/day)", 0.05, 30.0, 0.5)
 
-# ---------------- OPTIMIZER ----------------
+# =====================================================
+# TABS
+# =====================================================
+tab1, tab2, tab3 = st.tabs(["🔬 Optimizer", "📈 AI Prediction", "📋 Ingredients"])
+
+# =====================================================
+# FEED OPTIMIZER
+# =====================================================
 with tab1:
-    st.header("🔬 Feed Mix Optimizer")
+    st.header("Least Cost Feed Formulation")
 
-    model = LpProblem("Feed_Optimization", LpMinimize)
-    vars = {i: LpVariable(i, lowBound=0) for i in ingredients.index}
+    prob = LpProblem("FeedMix", LpMinimize)
+    ingredients = df["Ingredient"].tolist()
+    vars = LpVariable.dicts("Ingr", ingredients, lowBound=0)
 
-    model += lpSum(vars[i] for i in ingredients.index) == 1
-    model += lpSum(vars[i] * ingredients.loc[i, 'CP_%'] for i in ingredients.index) >= cp_req
-    model += lpSum(vars[i] * ingredients.loc[i, 'Energy_Kcal/kg'] for i in ingredients.index) >= energy_req
-    model += lpSum(vars[i] * ingredients.loc[i, 'Fibre_%'] for i in ingredients.index) >= fibre_req
-    model += lpSum(vars[i] * ingredients.loc[i, 'Calcium_%'] for i in ingredients.index) >= calcium_req
+    prob += lpSum(vars[i] * df[df["Ingredient"] == i]["Cost"].values[0] for i in ingredients)
+    prob += lpSum(vars[i] for i in ingredients) == 1
+    prob += lpSum(vars[i] * df[df["Ingredient"] == i]["CP"].values[0] for i in ingredients) >= cp_req
+    prob += lpSum(vars[i] * df[df["Ingredient"] == i]["Energy"].values[0] for i in ingredients) >= energy_req
 
-    model.solve()
+    prob.solve()
 
-    if LpStatus[model.status] == "Optimal":
-        results = {i: vars[i].varValue for i in ingredients.index if vars[i].varValue > 0.001}
-        result_df = pd.DataFrame.from_dict(results, orient='index', columns=['Proportion'])
+    if LpStatus[prob.status] == "Optimal":
+        result = {i: vars[i].value() for i in ingredients if vars[i].value() > 0.001}
+        result_df = pd.DataFrame(result.items(), columns=["Ingredient", "Proportion"])
+        result_df["Cost Contribution"] = result_df["Ingredient"].apply(
+            lambda x: df[df["Ingredient"] == x]["Cost"].values[0]
+        ) * result_df["Proportion"]
+
         st.dataframe(result_df)
-        st.plotly_chart(px.pie(result_df, values='Proportion', names=result_df.index))
+        st.success(f"Total Feed Cost per kg: ₦{value(prob.objective):.2f}")
+        st.plotly_chart(px.pie(result_df, values="Proportion", names="Ingredient"))
     else:
         st.error("No feasible solution found.")
 
-# ---------------- INGREDIENT TAB ----------------
+# =====================================================
+# AI GROWTH PREDICTION
+# =====================================================
 with tab2:
-    st.header("📋 Ingredient Database")
-    st.dataframe(ingredients_df)
+    st.header("AI Growth Prediction")
 
-# ---------------- GROWTH PREDICTION ----------------
+    avg_cp = df["CP"].mean()
+    avg_energy = df["Energy"].mean()
+
+    X_input = np.array([[age, weight, cp_req, energy_req, feed_intake, avg_cp, avg_energy]])
+    prediction = model.predict(X_input)[0]
+
+    st.metric("Predicted Daily Weight Gain", f"{prediction:.1f} g/day")
+
+# =====================================================
+# INGREDIENT MANAGER
+# =====================================================
 with tab3:
-    st.header("📈 Growth Prediction")
+    st.header("Ingredient Database Manager")
 
-    if LpStatus[model.status] == "Optimal":
-        proportions = np.array([vars[i].varValue for i in ingredients.index])
-        cp_vals = np.array([ingredients.loc[i, "CP_%"] for i in ingredients.index])
-        energy_vals = np.array([ingredients.loc[i, "Energy_Kcal/kg"] for i in ingredients.index])
+    edited_df = st.data_editor(df, num_rows="dynamic", use_container_width=True)
 
-        feed_cp = np.dot(proportions, cp_vals)
-        feed_energy = np.dot(proportions, energy_vals)
-
-        base_growth = breed_info["Growth_g_per_day"]
-        weight_gain = base_growth * (feed_cp / cp_req) * (feed_energy / energy_req)
-
-        if animal_type == "Poultry":
-            adult_weight = breed_info["Mature_Weight_kg"]
-        else:
-            adult_weight = breed_info["Adult_Weight_kg"]
-
-        expected_weight = adult_weight * (1 - np.exp(-0.05 * age_weeks))
-
-        st.metric("📈 Expected Weight Gain (g/day)", f"{weight_gain:.2f}")
-        st.metric("⚖️ Expected Body Weight (kg)", f"{expected_weight:.2f}")
+    if st.button("Save Changes"):
+        edited_df.to_csv(f"{animal.lower()}_ingredients.csv", index=False)
+        st.success("Ingredient database updated successfully.")

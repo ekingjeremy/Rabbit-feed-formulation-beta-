@@ -9,7 +9,7 @@ from datetime import datetime
 
 # Page config
 st.set_page_config(
-    page_title="🌾 Nigerian Livestock Feed Formulator",
+    page_title="🌾 Erimaya Nigerian Livestock Feed Formulator",
     page_icon="🐄",
     layout="wide",
     initial_sidebar_state="expanded"

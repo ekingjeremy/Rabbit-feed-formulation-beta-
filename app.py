@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 st.set_page_config(page_title="Necstech Feed Formulator", layout="wide")
 
@@ -48,6 +48,7 @@ with tab1:
     })
 
     st.dataframe(df_export)
+
     st.download_button("💾 Download Nutrient Guide",
                        df_export.to_csv(index=False),
                        "nutrient_guide.csv",
@@ -72,9 +73,9 @@ with tab2:
 
         st.dataframe(ingredients)
 
-        fig, ax = plt.subplots()
-        ax.bar(ingredients["Ingredient"], ingredients["Cost (₦/kg)"])
-        st.pyplot(fig)
+        fig = px.bar(ingredients, x="Ingredient", y="Cost (₦/kg)",
+                     title="Ingredient Cost Comparison")
+        st.plotly_chart(fig, use_container_width=True)
 
         st.download_button("💾 Download Feed Formula",
                            ingredients.to_csv(index=False),
@@ -98,46 +99,4 @@ with tab3:
             energy = maize*3300 + soy*2500 + bran*1800
             fibre = maize*0.02 + soy*0.06 + bran*0.12
 
-            df_mix = pd.DataFrame({
-                "Protein %": [protein],
-                "Energy kcal/kg": [energy/100],
-                "Fibre %": [fibre]
-            })
-
-            st.dataframe(df_mix)
-
-            st.download_button("💾 Download Nutrient Profile",
-                               df_mix.to_csv(index=False),
-                               "ingredient_mix_profile.csv",
-                               "text/csv")
-    else:
-        st.warning("Total must equal 100%")
-
-# =========================================================
-# 📈 TAB 4 — Weight Gain Prediction
-# =========================================================
-with tab4:
-    weight = st.number_input("Current Weight (kg)", 0.5, 500.0, 2.0)
-    protein = st.slider("Diet Protein %", 10, 30, 18)
-    energy = st.slider("Diet Energy kcal/kg", 2000, 3500, 2800)
-
-    if st.button("🔮 Predict Growth"):
-        daily_gain = (protein * 0.8) + (energy / 2000)
-
-        days = np.arange(1, 31)
-        growth = weight + (daily_gain/1000) * days
-
-        fig, ax = plt.subplots()
-        ax.plot(days, growth)
-        ax.set_title("Projected Weight Growth (30 Days)")
-        st.pyplot(fig)
-
-        df_growth = pd.DataFrame({
-            "Day": days,
-            "Projected Weight (kg)": growth
-        })
-
-        st.download_button("💾 Download Growth Projection",
-                           df_growth.to_csv(index=False),
-                           "growth_prediction.csv",
-                           "text/csv")
+            df_mix = p_

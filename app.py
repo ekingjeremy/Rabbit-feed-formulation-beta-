@@ -14,6 +14,48 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# LANDING PAGE
+# =====================================================
+st.markdown('<p class="big-font">🌍 Intelligent Livestock Feed Formulator</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">AI-powered nutrition platform for Rabbits, Poultry, and Cattle</p>', unsafe_allow_html=True)
+
+# Feature highlights
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.markdown("""
+    <div class="feature-box">
+        <h3 style="color: #27ae60;">✔ Least-Cost</h3>
+        <p>Optimize feed costs while meeting nutrition needs</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div class="feature-box">
+        <h3 style="color: #3498db;">✔ AI Prediction</h3>
+        <p>Machine learning growth forecasts</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div class="feature-box">
+        <h3 style="color: #e74c3c;">✔ Nigerian Data</h3>
+        <p>97 ingredients with local prices</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col4:
+    st.markdown("""
+    <div class="feature-box">
+        <h3 style="color: #f39c12;">✔ 31 Breeds</h3>
+        <p>Comprehensive breed database</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
 # -------------------- STYLING --------------------
 st.markdown("""<style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');

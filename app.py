@@ -6,11 +6,142 @@ import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestRegressor
 
-st.set_page_config(
-    page_title="🌍 Necstech Nigerian Livestock Feed Formulator",
-    page_icon="🐄",
-    layout="wide",
-    initial_sidebar_state="expanded"
+st.set_page_config(page_title="🌍 AI Livestock Feed Formulator", layout="wide")
+
+# =====================================================
+# CUSTOM STYLING
+# =====================================================
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+    
+    .main {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+    
+    h1, h2, h3 {
+        font-family: 'Poppins', sans-serif;
+        color: #2c3e50;
+    }
+    
+    .big-font {
+        font-size: 3rem !important;
+        font-weight: 700;
+        color: #27ae60;
+        text-align: center;
+        margin-bottom: 0;
+    }
+    
+    .subtitle {
+        font-size: 1.2rem;
+        color: #7f8c8d;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .feature-box {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin: 1rem 0;
+        transition: transform 0.3s;
+    }
+    
+    .feature-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .stButton>button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 25px;
+        padding: 0.5rem 2rem;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .stButton>button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# =====================================================
+# LOAD DATA
+# =====================================================
+@st.cache_data
+def load_data():
+    rabbit = pd.read_csv("rabbit_ingredients.csv")
+    poultry = pd.read_csv("poultry_ingredients.csv")
+    cattle = pd.read_csv("cattle_ingredients.csv")
+    ml_data = pd.read_csv("livestock_feed_training_dataset.csv")
+    return rabbit, poultry, cattle, ml_data
+
+rabbit_df, poultry_df, cattle_df, ml_df = load_data()
+
+# =====================================================
+# TRAIN AI MODEL
+# =====================================================
+@st.cache_resource
+def train_model(data):
+    X = data[[
+        "Age_Weeks", "Body_Weight_kg",
+        "CP_Requirement_%", "Energy_Requirement_Kcal",
+        "Feed_Intake_kg", "Ingredient_CP_%", "Ingredient_Energy"
+    ]]
+    y = data["Expected_Daily_Gain_g"]
+    model = RandomForestRegressor(n_estimators=200, random_state=42)
+    model.fit(X, y)
+    return model
+
+model = train_model(ml_df)
+
+# =====================================================
+# LANDING PAGE
+# =====================================================
+st.markdown('<p class="big-font">🌍 Necstech Nigerian Livestock Feed Formulator</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">AI-powered nutrition platform for Rabbits, Poultry, and Cattle</p>', unsafe_allow_html=True)
+
+# Feature highlights
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.markdown("""
+    <div class="feature-box">
+        <h3 style="color: #27ae60;">✔ Least-Cost</h3>
+        <p>Optimize feed costs while meeting nutrition needs</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div class="feature-box">
+        <h3 style="color: #3498db;">✔ AI Prediction</h3>
+        <p>Machine learning growth forecasts</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div class="feature-box">
+        <h3 style="color: #e74c3c;">✔ Nigerian Data</h3>
+        <p>97 ingredients with local prices</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col4:
+    st.markdown("""
+    <div class="feature-box">
+        <h3 style="color: #f39c12;">✔ 31 Breeds</h3>
+        <p>Comprehensive breed database</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
 )
 
 st.title("🌍 Necstech Nigerian Livestock Feed Formulator")

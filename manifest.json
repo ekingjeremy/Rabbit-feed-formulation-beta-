@@ -1,0 +1,58 @@
+{
+  "name": "Necstech Feed Optimizer",
+  "short_name": "Necstech",
+  "description": "AI-powered livestock feed formulation for Nigerian farmers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#27ae60",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["agriculture", "business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/static/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Feed Optimizer",
+      "short_name": "Optimize",
+      "description": "Start feed formulation",
+      "url": "/?page=formulator",
+      "icons": [
+        {
+          "src": "/static/shortcut-optimizer.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Breed Database",
+      "short_name": "Breeds",
+      "description": "View livestock breeds",
+      "url": "/?page=breeds",
+      "icons": [
+        {
+          "src": "/static/shortcut-breeds.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

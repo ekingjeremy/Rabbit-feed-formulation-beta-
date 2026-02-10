@@ -1,8 +1,5 @@
 import subprocess
 import sys
-
-subprocess.check_call([sys.executable, "-m", "pip", "install", "pulp"])
-
 from pulp import LpProblem, LpMinimize, LpVariable, lpSum, LpStatus, value
 import streamlit as st
 import pandas as pd

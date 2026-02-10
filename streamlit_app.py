@@ -1,6 +1,3 @@
-import subprocess
-import sys
-from pulp import LpProblem, LpMinimize, LpVariable, lpSum, LpStatus, value
 import streamlit as st
 import pandas as pd
 import numpy as np

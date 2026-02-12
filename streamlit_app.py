@@ -1430,17 +1430,6 @@ p, span, div, label {
 }
 
 /* ==================================================
-   LANDING PAGE OVERRIDE (LIGHT)
-   ================================================== */
-/* This keeps ONLY the landing/hero section light */
-
-.hero-wrap,
-.hero-wrap * {
-  background-color: var(--bg-light) !important;
-  color: #1f2937 !important;
-}
-
-/* ==================================================
    BUTTONS & TABS
    ================================================== */
 

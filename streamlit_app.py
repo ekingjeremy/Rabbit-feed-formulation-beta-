@@ -1425,6 +1425,61 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+
+/* ===============================
+   SOFT AGRI-TECH COLOR PALETTE
+   =============================== */
+
+:root {
+  --primary-green: #2f6f55;
+  --accent-green: #6fae92;
+  --background-main: #fafafa;
+  --background-soft: #f3f6f4;
+  --text-main: #2b2b2b;
+  --text-muted: #6b7280;
+}
+
+/* App background */
+.stApp {
+  background-color: var(--background-soft);
+  color: var(--text-main);
+}
+
+/* Main content card feel */
+.main .block-container {
+  background-color: var(--background-main);
+  border-radius: 12px;
+}
+
+/* Primary buttons */
+.stButton > button[kind="primary"] {
+  background-color: var(--primary-green) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+/* Hover state */
+.stButton > button[kind="primary"]:hover {
+  background-color: #285e48 !important;
+}
+
+/* Tabs */
+.stTabs [role="tab"][aria-selected="true"] {
+  background-color: var(--primary-green) !important;
+  color: #ffffff !important;
+  border-radius: 8px;
+}
+
+/* Secondary text */
+small, .stMarkdown p {
+  color: var(--text-muted);
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 # ── Footer ──
 st.markdown("""

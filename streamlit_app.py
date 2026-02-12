@@ -18,6 +18,7 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
+    /* ── LIGHT THEME (default) ── */
     :root {
         --green-900: #0d2818;
         --green-800: #154a2e;
@@ -30,12 +31,20 @@ st.markdown("""
         --green-50:  #f0faf5;
         --amber:     #e8a020;
         --amber-light: #fdf0d5;
-        --slate-900: #1a2332;
-        --slate-700: #334155;
-        --slate-500: #64748b;
-        --slate-300: #cbd5e1;
-        --slate-100: #f1f5f9;
-        --white:     #ffffff;
+
+        /* semantic tokens — overridden in dark mode */
+        --bg-app:        #f1f5f9;
+        --bg-card:       #ffffff;
+        --bg-card-hover: #f8fafc;
+        --bg-input:      #ffffff;
+        --bg-sidebar:    #ffffff;
+        --border:        rgba(0,0,0,0.07);
+        --border-strong: #cbd5e1;
+        --text-primary:  #1a2332;
+        --text-secondary:#334155;
+        --text-muted:    #64748b;
+        --text-inverse:  #ffffff;
+
         --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
         --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06);
         --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
@@ -43,12 +52,34 @@ st.markdown("""
         --radius-lg: 20px;
     }
 
-    html, body, [class*="css"] {
-        font-family: 'DM Sans', sans-serif;
-        color: var(--slate-900);
+    /* ── DARK THEME ── */
+    :root.dark {
+        --bg-app:        #0f1117;
+        --bg-card:       #1a1f2e;
+        --bg-card-hover: #1f2640;
+        --bg-input:      #242938;
+        --bg-sidebar:    #13171f;
+        --border:        rgba(255,255,255,0.07);
+        --border-strong: rgba(255,255,255,0.12);
+        --text-primary:  #e8edf5;
+        --text-secondary:#c4cdd8;
+        --text-muted:    #7a8899;
+        --text-inverse:  #0f1117;
+
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
     }
 
-    .stApp { background: var(--slate-100); }
+    html, body, [class*="css"] {
+        font-family: 'DM Sans', sans-serif;
+        color: var(--text-primary);
+    }
+
+    .stApp {
+        background: var(--bg-app) !important;
+        transition: background 0.25s;
+    }
 
     .main .block-container {
         padding: 0 2rem 3rem 2rem;
@@ -57,57 +88,45 @@ st.markdown("""
 
     #MainMenu, footer, header { visibility: hidden; }
 
+    /* ── CARDS ── */
     .card {
-        background: var(--white);
+        background: var(--bg-card);
         border-radius: var(--radius);
         padding: 1.5rem;
         box-shadow: var(--shadow-sm);
-        border: 1px solid rgba(0,0,0,0.04);
-        transition: box-shadow 0.25s, transform 0.25s;
+        border: 1px solid var(--border);
+        transition: box-shadow 0.25s, transform 0.25s, background 0.25s;
     }
     .card:hover {
+        background: var(--bg-card-hover);
         box-shadow: var(--shadow-md);
         transform: translateY(-2px);
     }
 
     .feature-card {
-        background: var(--white);
+        background: var(--bg-card);
         border-radius: var(--radius);
         padding: 1.75rem 1.5rem;
-        border: 1px solid rgba(0,0,0,0.06);
+        border: 1px solid var(--border);
         box-shadow: var(--shadow-sm);
-        transition: box-shadow 0.25s, transform 0.2s;
+        transition: box-shadow 0.25s, transform 0.2s, background 0.25s;
         height: 100%;
     }
     .feature-card:hover {
+        background: var(--bg-card-hover);
         box-shadow: var(--shadow-lg);
         transform: translateY(-3px);
     }
-    .feat-icon {
-        width: 44px; height: 44px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        margin-bottom: 1rem;
-    }
+
+    .feat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.25rem; margin-bottom:1rem; }
     .feat-icon.green  { background: var(--green-100); }
     .feat-icon.amber  { background: var(--amber-light); }
     .feat-icon.blue   { background: #e0f0ff; }
     .feat-icon.purple { background: #ede9ff; }
-    .feat-title {
-        font-weight: 600;
-        font-size: 0.95rem;
-        color: var(--slate-900);
-        margin-bottom: 0.4rem;
-    }
-    .feat-body {
-        font-size: 0.85rem;
-        color: var(--slate-500);
-        line-height: 1.55;
-    }
+    .feat-title { font-weight:600; font-size:0.95rem; color:var(--text-primary); margin-bottom:0.4rem; }
+    .feat-body  { font-size:0.85rem; color:var(--text-muted); line-height:1.55; }
 
+    /* ── HERO ── */
     .hero-wrap {
         background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 60%, var(--green-500) 100%);
         border-radius: var(--radius-lg);
@@ -116,236 +135,129 @@ st.markdown("""
         position: relative;
         overflow: hidden;
     }
-    .hero-wrap::before {
-        content: '';
-        position: absolute;
-        top: -60px; right: -80px;
-        width: 340px; height: 340px;
-        background: rgba(255,255,255,0.04);
-        border-radius: 50%;
-    }
-    .hero-wrap::after {
-        content: '';
-        position: absolute;
-        bottom: -40px; left: 30%;
-        width: 220px; height: 220px;
-        background: rgba(255,255,255,0.03);
-        border-radius: 50%;
-    }
-    .hero-tag {
-        display: inline-block;
-        background: rgba(255,255,255,0.12);
-        border: 1px solid rgba(255,255,255,0.2);
-        color: var(--green-300);
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        padding: 0.3rem 0.9rem;
-        border-radius: 20px;
-        margin-bottom: 1.2rem;
-    }
-    .hero-heading {
-        font-family: 'DM Serif Display', serif;
-        font-size: 3.2rem;
-        color: var(--white);
-        line-height: 1.15;
-        margin-bottom: 1.2rem;
-        max-width: 620px;
-    }
-    .hero-heading em {
-        font-style: italic;
-        color: var(--green-300);
-    }
-    .hero-body {
-        font-size: 1.05rem;
-        color: rgba(255,255,255,0.75);
-        line-height: 1.7;
-        max-width: 560px;
-        margin-bottom: 2rem;
-    }
-    .hero-stats {
-        display: flex;
-        gap: 2.5rem;
-        margin-top: 2.5rem;
-        padding-top: 2rem;
-        border-top: 1px solid rgba(255,255,255,0.12);
-    }
-    .hero-stat-num {
-        font-family: 'DM Serif Display', serif;
-        font-size: 2rem;
-        color: var(--white);
-        line-height: 1;
-    }
-    .hero-stat-label {
-        font-size: 0.8rem;
-        color: rgba(255,255,255,0.55);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-top: 0.25rem;
-    }
+    .hero-wrap::before { content:''; position:absolute; top:-60px; right:-80px; width:340px; height:340px; background:rgba(255,255,255,0.04); border-radius:50%; }
+    .hero-wrap::after  { content:''; position:absolute; bottom:-40px; left:30%; width:220px; height:220px; background:rgba(255,255,255,0.03); border-radius:50%; }
+    .hero-tag { display:inline-block; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:var(--green-300); font-size:0.75rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; padding:0.3rem 0.9rem; border-radius:20px; margin-bottom:1.2rem; }
+    .hero-heading { font-family:'DM Serif Display',serif; font-size:3.2rem; color:#ffffff; line-height:1.15; margin-bottom:1.2rem; max-width:620px; }
+    .hero-heading em { font-style:italic; color:var(--green-300); }
+    .hero-body { font-size:1.05rem; color:rgba(255,255,255,0.75); line-height:1.7; max-width:560px; margin-bottom:2rem; }
+    .hero-stats { display:flex; gap:2.5rem; margin-top:2.5rem; padding-top:2rem; border-top:1px solid rgba(255,255,255,0.12); }
+    .hero-stat-num   { font-family:'DM Serif Display',serif; font-size:2rem; color:#ffffff; line-height:1; }
+    .hero-stat-label { font-size:0.8rem; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:0.05em; margin-top:0.25rem; }
 
+    /* ── BUTTONS ── */
     .stButton > button {
         font-family: 'DM Sans', sans-serif !important;
         font-weight: 600 !important;
         border-radius: 8px !important;
         transition: all 0.2s !important;
+        white-space: normal !important;
     }
     .stButton > button[kind="primary"] {
         background: linear-gradient(135deg, var(--green-700), var(--green-500)) !important;
         border: none !important;
-        color: var(--white) !important;
+        color: #ffffff !important;
         padding: 0.55rem 1.5rem !important;
     }
     .stButton > button[kind="primary"]:hover {
-        box-shadow: 0 6px 20px rgba(34, 139, 85, 0.35) !important;
+        box-shadow: 0 6px 20px rgba(34,139,85,0.35) !important;
         transform: translateY(-1px) !important;
     }
     .stButton > button[kind="secondary"] {
-        background: var(--white) !important;
-        border: 1.5px solid var(--slate-300) !important;
-        color: var(--slate-700) !important;
+        background: var(--bg-card) !important;
+        border: 1.5px solid var(--border-strong) !important;
+        color: var(--text-secondary) !important;
     }
     .stButton > button[kind="secondary"]:hover {
         border-color: var(--green-500) !important;
         color: var(--green-700) !important;
     }
 
-    .section-heading {
-        font-family: 'DM Serif Display', serif;
-        font-size: 1.6rem;
-        color: var(--slate-900);
-        margin-bottom: 0.3rem;
-    }
-    .section-sub {
-        font-size: 0.9rem;
-        color: var(--slate-500);
-        margin-bottom: 1.5rem;
-    }
+    /* ── TYPOGRAPHY ── */
+    .section-heading { font-family:'DM Serif Display',serif; font-size:1.6rem; color:var(--text-primary); margin-bottom:0.3rem; }
+    .section-sub     { font-size:0.9rem; color:var(--text-muted); margin-bottom:1.5rem; }
+    .page-header     { margin-bottom:1.75rem; }
+    .page-title      { font-family:'DM Serif Display',serif; font-size:2.2rem; color:var(--text-primary); line-height:1.2; margin-bottom:0.4rem; }
+    .page-desc       { font-size:0.95rem; color:var(--text-muted); max-width:600px; }
 
-    .steps-row {
-        display: flex;
-        gap: 0;
-        position: relative;
-    }
-    .step-item {
-        flex: 1;
-        text-align: center;
-        padding: 1.5rem 1rem;
-        position: relative;
-    }
-    .step-num {
-        width: 36px; height: 36px;
-        border-radius: 50%;
-        background: var(--green-700);
-        color: var(--white);
-        font-weight: 700;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 0.75rem;
-        position: relative;
-        z-index: 2;
-    }
-    .step-title { font-weight: 600; font-size: 0.9rem; color: var(--slate-900); }
-    .step-body  { font-size: 0.8rem; color: var(--slate-500); margin-top: 0.3rem; line-height: 1.5; }
-    .step-connector {
-        position: absolute;
-        top: 2.3rem;
-        left: calc(50% + 18px);
-        right: calc(-50% + 18px);
-        height: 2px;
-        background: var(--green-300);
-        z-index: 1;
-    }
+    /* ── STEPS ── */
+    .steps-row { display:flex; gap:0; position:relative; }
+    .step-item { flex:1; text-align:center; padding:1.5rem 1rem; position:relative; }
+    .step-num  { width:36px; height:36px; border-radius:50%; background:var(--green-700); color:#ffffff; font-weight:700; font-size:0.9rem; display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem; position:relative; z-index:2; }
+    .step-title { font-weight:600; font-size:0.9rem; color:var(--text-primary); }
+    .step-body  { font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem; line-height:1.5; }
+    .step-connector { position:absolute; top:2.3rem; left:calc(50% + 18px); right:calc(-50% + 18px); height:2px; background:var(--green-300); z-index:1; }
 
-    .page-header { margin-bottom: 1.75rem; }
-    .page-title {
-        font-family: 'DM Serif Display', serif;
-        font-size: 2.2rem;
-        color: var(--slate-900);
-        line-height: 1.2;
-        margin-bottom: 0.4rem;
-    }
-    .page-desc {
-        font-size: 0.95rem;
-        color: var(--slate-500);
-        max-width: 600px;
-    }
+    /* ── STAGE HEADER ── */
+    .stage-header { background:linear-gradient(90deg,var(--green-700),var(--green-500)); color:#ffffff; padding:0.7rem 1.1rem; border-radius:8px; margin:1.2rem 0 0.8rem; font-weight:600; font-size:0.9rem; letter-spacing:0.02em; }
 
-    .stage-header {
-        background: linear-gradient(90deg, var(--green-700), var(--green-500));
-        color: var(--white);
-        padding: 0.7rem 1.1rem;
-        border-radius: 8px;
-        margin: 1.2rem 0 0.8rem;
-        font-weight: 600;
-        font-size: 0.9rem;
-        letter-spacing: 0.02em;
-    }
+    /* ── BREED CARD ── */
+    .breed-card-wrap { background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--border); border-left:4px solid var(--green-500); padding:1.25rem 1.5rem; margin-bottom:1rem; box-shadow:var(--shadow-sm); transition:box-shadow 0.2s,background 0.25s; }
+    .breed-card-wrap:hover { background:var(--bg-card-hover); box-shadow:var(--shadow-md); }
 
-    .breed-card-wrap {
-        background: var(--white);
-        border-radius: var(--radius);
-        border: 1px solid rgba(0,0,0,0.06);
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: var(--shadow-sm);
-        border-left: 4px solid var(--green-500);
-        transition: box-shadow 0.2s;
-    }
-    .breed-card-wrap:hover { box-shadow: var(--shadow-md); }
+    /* ── ALERTS ── */
+    .alert-amber { background:var(--amber-light); border-left:4px solid var(--amber); padding:0.9rem 1.1rem; border-radius:8px; margin:0.75rem 0; font-size:0.9rem; color:#334155; }
+    .alert-green { background:var(--green-50);    border-left:4px solid var(--green-500); padding:0.9rem 1.1rem; border-radius:8px; margin:0.75rem 0; font-size:0.9rem; color:#334155; }
 
-    .alert-amber {
-        background: var(--amber-light);
-        border-left: 4px solid var(--amber);
-        padding: 0.9rem 1.1rem;
-        border-radius: 8px;
-        margin: 0.75rem 0;
-        font-size: 0.9rem;
-        color: var(--slate-700);
-    }
-    .alert-green {
-        background: var(--green-50);
-        border-left: 4px solid var(--green-500);
-        padding: 0.9rem 1.1rem;
-        border-radius: 8px;
-        margin: 0.75rem 0;
-        font-size: 0.9rem;
-        color: var(--slate-700);
-    }
+    /* dark-mode alert overrides */
+    :root.dark .alert-amber { background:rgba(232,160,32,0.12); color:var(--text-secondary); }
+    :root.dark .alert-green { background:rgba(45,168,104,0.1);  color:var(--text-secondary); }
 
-    hr { border-color: var(--slate-300) !important; margin: 1.5rem 0 !important; }
+    hr { border-color:var(--border-strong) !important; margin:1.5rem 0 !important; }
 
+    /* ── SIDEBAR ── */
     [data-testid="stSidebar"] {
-        background: var(--white) !important;
-        border-right: 1px solid var(--slate-300) !important;
+        background: var(--bg-sidebar) !important;
+        border-right: 1px solid var(--border-strong) !important;
     }
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] .stMarkdown { color: var(--text-secondary) !important; }
+    [data-testid="stSidebar"] [data-testid="stMetricValue"]  { color: var(--text-primary)   !important; font-size:1.1rem !important; }
+    [data-testid="stSidebar"] [data-testid="stMetricLabel"]  { color: var(--text-muted)     !important; }
+    [data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,[data-testid="stSidebar"] h4 { color: var(--text-primary)  !important; }
 
+    /* ── METRICS ── */
     [data-testid="metric-container"] {
-        background: var(--white);
-        border: 1px solid rgba(0,0,0,0.06);
-        border-radius: var(--radius);
-        padding: 0.9rem 1rem;
-        box-shadow: var(--shadow-sm);
+        background: var(--bg-card) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: var(--radius) !important;
+        padding: 0.9rem 1rem !important;
+        box-shadow: var(--shadow-sm) !important;
+        transition: background 0.25s !important;
     }
-    [data-testid="metric-container"] label {
+    [data-testid="metric-container"] label,
+    [data-testid="stMetricLabel"] {
         font-size: 0.78rem !important;
-        color: var(--slate-500) !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
+        color: var(--text-muted) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        white-space: normal !important;
     }
-    [data-testid="metric-container"] [data-testid="stMetricValue"] {
+    [data-testid="stMetricValue"] {
         font-family: 'DM Serif Display', serif !important;
-        font-size: 1.6rem !important;
-        color: var(--slate-900) !important;
+        font-size: 1.55rem !important;
+        color: var(--text-primary) !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        line-height: 1.2 !important;
+    }
+    [data-testid="stMetricDelta"] {
+        font-size: 0.8rem !important;
+        white-space: normal !important;
+        overflow: visible !important;
     }
 
+    /* ── TABS ── */
     .stTabs [role="tablist"] {
-        background: var(--white);
+        background: var(--bg-card);
         border-radius: 10px;
         padding: 0.3rem;
-        border: 1px solid rgba(0,0,0,0.06);
+        border: 1px solid var(--border);
         box-shadow: var(--shadow-sm);
         gap: 0.2rem;
     }
@@ -354,46 +266,145 @@ st.markdown("""
         font-size: 0.85rem !important;
         font-weight: 500 !important;
         padding: 0.45rem 1rem !important;
-        color: var(--slate-600) !important;
+        color: var(--text-secondary) !important;
         transition: all 0.2s !important;
     }
     .stTabs [role="tab"][aria-selected="true"] {
         background: var(--green-700) !important;
-        color: var(--white) !important;
+        color: #ffffff !important;
     }
     .stTabs [data-baseweb="tab-panel"] {
-        background: var(--white);
-        border-radius: 10px;
-        padding: 1.5rem;
-        border: 1px solid rgba(0,0,0,0.06);
-        margin-top: 0.5rem;
-        box-shadow: var(--shadow-sm);
+        background: var(--bg-card) !important;
+        border-radius: 10px !important;
+        padding: 1.75rem 1.5rem !important;
+        border: 1px solid var(--border) !important;
+        margin-top: 0.5rem !important;
+        box-shadow: var(--shadow-sm) !important;
+        transition: background 0.25s !important;
+    }
+    .stTabs [data-baseweb="tab-panel"] p,
+    .stTabs [data-baseweb="tab-panel"] span,
+    .stTabs [data-baseweb="tab-panel"] div,
+    .stTabs [data-baseweb="tab-panel"] label,
+    .stTabs [data-baseweb="tab-panel"] li  { color: var(--text-secondary) !important; }
+    .stTabs [data-baseweb="tab-panel"] h1,
+    .stTabs [data-baseweb="tab-panel"] h2,
+    .stTabs [data-baseweb="tab-panel"] h3,
+    .stTabs [data-baseweb="tab-panel"] h4  { color: var(--text-primary)   !important; }
+
+    /* ── INPUTS ── */
+    .stSelectbox label, .stSlider label, .stNumberInput label,
+    .stTextInput label, .stCheckbox label {
+        font-size: 0.88rem !important;
+        font-weight: 500 !important;
+        color: var(--text-secondary) !important;
+    }
+    [data-baseweb="select"] span,
+    [data-baseweb="input"] input,
+    input[type="number"], input[type="text"] { color: var(--text-primary) !important; }
+
+    [data-baseweb="select"] > div {
+        background: var(--bg-input) !important;
+        border-color: var(--border-strong) !important;
+        color: var(--text-primary) !important;
     }
 
-    .footer-wrap {
-        background: var(--slate-900);
-        color: rgba(255,255,255,0.6);
-        border-radius: var(--radius-lg);
-        padding: 2.5rem 3rem;
-        margin-top: 3rem;
+    /* ── EXPANDER ── */
+    [data-testid="stExpander"] summary {
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        color: var(--green-700) !important;
+    }
+    [data-testid="stExpander"] { background: var(--bg-card) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; }
+
+    /* ── DATAFRAMES ── */
+    [data-testid="stDataFrame"] { border-radius:8px !important; overflow:hidden !important; border:1px solid var(--border-strong) !important; }
+    [data-testid="stDataFrame"] th { background:var(--bg-input) !important; color:var(--text-secondary) !important; font-weight:600 !important; font-size:0.82rem !important; text-transform:uppercase !important; letter-spacing:0.04em !important; padding:0.6rem 0.8rem !important; }
+    [data-testid="stDataFrame"] td { color:var(--text-primary) !important; font-size:0.88rem !important; padding:0.5rem 0.8rem !important; white-space:normal !important; overflow:visible !important; }
+
+    /* ── ALERTS ── */
+    [data-testid="stSuccess"] { background:var(--green-50) !important; border-left:4px solid var(--green-500) !important; color:var(--text-primary) !important; border-radius:8px !important; }
+    [data-testid="stInfo"]    { background:#eff6ff !important; border-left:4px solid #3b82f6 !important; color:var(--text-primary) !important; border-radius:8px !important; }
+    [data-testid="stWarning"] { background:var(--amber-light) !important; border-left:4px solid var(--amber) !important; color:var(--text-primary) !important; border-radius:8px !important; }
+    [data-testid="stError"]   { background:#fff0f0 !important; border-left:4px solid #e74c3c !important; color:var(--text-primary) !important; border-radius:8px !important; }
+
+    :root.dark [data-testid="stSuccess"] { background:rgba(45,168,104,0.12) !important; }
+    :root.dark [data-testid="stInfo"]    { background:rgba(59,130,246,0.12) !important; }
+    :root.dark [data-testid="stWarning"] { background:rgba(232,160,32,0.12) !important; }
+    :root.dark [data-testid="stError"]   { background:rgba(231,76,60,0.12)  !important; }
+
+    /* ── CAPTION ── */
+    [data-testid="stCaptionContainer"] p { color:var(--text-muted) !important; font-size:0.8rem !important; }
+
+    /* ── FOOTER ── */
+    .footer-wrap { background:var(--green-900); color:rgba(255,255,255,0.6); border-radius:var(--radius-lg); padding:2.5rem 3rem; margin-top:3rem; display:flex; align-items:center; justify-content:space-between; }
+    .footer-brand { font-family:'DM Serif Display',serif; font-size:1.1rem; color:#ffffff; }
+    .footer-meta  { font-size:0.78rem; }
+    .footer-badges { display:flex; gap:0.5rem; }
+    .badge { padding:0.25rem 0.75rem; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); border-radius:20px; font-size:0.72rem; color:rgba(255,255,255,0.65); }
+
+    /* ── THEME TOGGLE PILL ── */
+    .theme-toggle-wrap {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: 0.6rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-strong);
+        border-radius: 30px;
+        padding: 0.35rem 0.9rem;
+        width: fit-content;
+        cursor: pointer;
+        transition: all 0.2s;
     }
-    .footer-brand {
-        font-family: 'DM Serif Display', serif;
-        font-size: 1.1rem;
-        color: var(--white);
+    .theme-toggle-wrap:hover { border-color: var(--green-500); }
+    .theme-toggle-label { font-size:0.82rem; font-weight:600; color:var(--text-secondary); }
+
+    /* ── NUTRIENT PANEL ── */
+    .nutrient-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
     }
-    .footer-meta { font-size: 0.78rem; }
-    .footer-badges { display: flex; gap: 0.5rem; }
-    .badge {
-        padding: 0.25rem 0.75rem;
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.1);
+    .nutrient-panel-title {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--green-700);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .breed-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: var(--green-100);
+        color: var(--green-700);
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding: 0.25rem 0.8rem;
         border-radius: 20px;
-        font-size: 0.72rem;
-        color: rgba(255,255,255,0.65);
+        margin-bottom: 0.75rem;
+    }
+    :root.dark .breed-badge { background: rgba(45,168,104,0.15); color: var(--green-400); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+        [data-testid="column"] { width:100% !important; flex:1 1 100% !important; }
+        .stButton > button { width:100% !important; font-size:0.88rem !important; }
+        [data-testid="stMetricValue"] { font-size:1.2rem !important; }
+        .hero-heading { font-size:2.2rem; }
+        .hero-wrap { padding:2.5rem 1.5rem; }
+    }
+    @media (max-width: 480px) {
+        .main .block-container { padding:0 1rem 1.5rem; }
+        body { font-size:0.9rem; }
+        [data-testid="stMetricValue"] { font-size:1rem !important; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -564,6 +575,15 @@ if 'page' not in st.session_state:
     st.session_state.page = 'home'
 if 'formulation_history' not in st.session_state:
     st.session_state.formulation_history = []
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
+
+# Inject dark class onto <html> element for CSS :root.dark selectors
+_dm = st.session_state.dark_mode
+st.markdown(
+    f"<script>document.documentElement.classList.{'add' if _dm else 'remove'}('dark');</script>",
+    unsafe_allow_html=True,
+)
 
 
 def generate_report(animal, age, weight, cp_req, energy_req, feed_intake,
@@ -628,7 +648,7 @@ def generate_report(animal, age, weight, cp_req, energy_req, feed_intake,
 
 def render_navbar():
     current = st.session_state.page
-    cols = st.columns([2, 1, 1, 1, 1])
+    cols = st.columns([2, 1, 1, 1, 1, 0.7])
     with cols[0]:
         st.markdown("""
         <div style="display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0;">
@@ -636,7 +656,7 @@ def render_navbar():
                 border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">
                 🌱
             </div>
-            <span style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:#1a2332;">
+            <span style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--text-primary);">
                 Necs<span style="color:#228b55;">tech</span>
             </span>
         </div>
@@ -653,6 +673,12 @@ def render_navbar():
             if st.button(label, key=f"nav_{key}", type=btn_type, use_container_width=True):
                 st.session_state.page = key
                 st.rerun()
+    # Dark/Light toggle on the far right of navbar
+    with cols[5]:
+        icon = "☀️" if st.session_state.dark_mode else "🌙"
+        if st.button(icon, key="nav_theme", use_container_width=True):
+            st.session_state.dark_mode = not st.session_state.dark_mode
+            st.rerun()
     st.markdown("<hr style='margin:0.5rem 0 1.5rem 0;'>", unsafe_allow_html=True)
 
 
@@ -1020,6 +1046,16 @@ def show_formulator():
     </div>
     """, unsafe_allow_html=True)
 
+    # ── Dark / Light mode toggle ──
+    st.sidebar.markdown("### 🎨 Appearance")
+    current_mode_label = "🌙 Dark Mode" if not st.session_state.dark_mode else "☀️ Light Mode"
+    if st.sidebar.button(current_mode_label, key="theme_toggle", use_container_width=True):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+        st.rerun()
+    mode_status = "Dark mode ON" if st.session_state.dark_mode else "Light mode ON"
+    st.sidebar.caption(f"Currently: {mode_status}")
+    st.sidebar.markdown("---")
+
     if 'selected_breed' in st.session_state:
         st.sidebar.success(f"✓ Breed: {st.session_state.selected_breed}")
 
@@ -1053,23 +1089,135 @@ def show_formulator():
         st.header("🔬 Least-Cost Feed Formulation")
         st.markdown("Using **linear programming** to find the cheapest ingredient blend meeting all nutritional requirements.")
 
-        with st.expander("⚙️ Advanced Constraints (Optional)"):
-            col1, col2 = st.columns(2)
-            with col1:
-                use_fiber_constraint = st.checkbox("Add Fiber Constraint")
-                if use_fiber_constraint:
-                    min_fiber = st.slider("Minimum Fiber (%)", 0, 30, 12)
-                    max_fiber = st.slider("Maximum Fiber (%)", 0, 40, 20)
-                else:
-                    min_fiber, max_fiber = 12, 20
-            with col2:
-                limit_ingredients = st.checkbox("Limit Number of Ingredients")
-                if limit_ingredients:
-                    max_ingredients = st.slider("Maximum Ingredients", 3, 15, 8)
-                else:
-                    max_ingredients = 15
+        # ── ① Breed & Production Stage Selector ──────────────────────────
+        st.markdown('<div class="nutrient-panel">', unsafe_allow_html=True)
+        st.markdown('<div class="nutrient-panel-title">🐾 Step 1 — Select Breed & Production Stage</div>', unsafe_allow_html=True)
 
-        if st.button("🚀 Optimise Feed Formula", type="primary"):
+        breed_db   = get_breed_database()
+        nutrient_db = get_nutrient_requirements()
+
+        breed_col, stage_col = st.columns(2)
+        with breed_col:
+            breed_options = ["— Select a breed (optional) —"] + list(breed_db[animal].keys())
+            # pre-select if carried from Breed Database page
+            default_breed_idx = 0
+            if 'selected_breed' in st.session_state and st.session_state.selected_breed in breed_db[animal]:
+                default_breed_idx = breed_options.index(st.session_state.selected_breed)
+            selected_breed = st.selectbox(
+                "🐾 Breed",
+                breed_options,
+                index=default_breed_idx,
+                key="opt_breed",
+                help="Choose a breed to see its recommended feeding specs"
+            )
+        with stage_col:
+            stage_options = list(nutrient_db[animal].keys())
+            selected_stage = st.selectbox(
+                "🎯 Production Stage",
+                stage_options,
+                key="opt_stage",
+                help="Choose the production stage to auto-fill recommended nutrient targets"
+            )
+
+        # Show breed badge if a breed is selected
+        if selected_breed and selected_breed != "— Select a breed (optional) —":
+            binfo = breed_db[animal][selected_breed]
+            st.markdown(
+                f'<div class="breed-badge">✓ {selected_breed} &nbsp;·&nbsp; {binfo["Type"]} &nbsp;·&nbsp; '
+                f'Recommended CP: {binfo["Recommended CP (%)"]}</div>',
+                unsafe_allow_html=True
+            )
+
+        # Show stage nutrient summary
+        stage_data = nutrient_db[animal][selected_stage]
+        sd_cols = st.columns(len(stage_data))
+        for idx, (k, v) in enumerate(stage_data.items()):
+            with sd_cols[idx]:
+                st.markdown(
+                    f'<div style="text-align:center;padding:0.4rem 0.2rem;">'
+                    f'<div style="font-size:0.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">{k.replace(" (%)", "").replace(" (kcal/kg)", "").replace(" (g/day)", "").replace(" (kg/day)", "")}</div>'
+                    f'<div style="font-size:0.95rem;font-weight:700;color:var(--green-700);margin-top:0.15rem;">{v}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # ── ② Nutrient Target Inputs ─────────────────────────────────────
+        st.markdown('<div class="nutrient-panel" style="margin-top:0.75rem;">', unsafe_allow_html=True)
+        st.markdown('<div class="nutrient-panel-title">🧪 Step 2 — Set Nutrient Targets</div>', unsafe_allow_html=True)
+        st.caption("Auto-filled from the selected stage. Adjust freely before running the optimiser.")
+
+        # Parse midpoint from "X-Y" range strings
+        def parse_mid(val_str):
+            try:
+                parts = str(val_str).split("-")
+                return round((float(parts[0]) + float(parts[-1])) / 2, 1)
+            except Exception:
+                return 0.0
+
+        cp_default     = parse_mid(stage_data.get("Crude Protein (%)", "16-18"))
+        energy_default = parse_mid(stage_data.get("Energy (kcal/kg)", "2500-2700"))
+        fiber_default  = parse_mid(stage_data.get("Crude Fiber (%)", "12-16"))
+
+        # Override with sidebar sliders (kept for backward compat) but show inline
+        n_col1, n_col2, n_col3 = st.columns(3)
+        with n_col1:
+            cp_req = st.number_input(
+                "Crude Protein (%)",
+                min_value=8.0, max_value=35.0,
+                value=float(cp_default), step=0.5,
+                key="ni_cp",
+                help="Minimum crude protein % in the final mix"
+            )
+        with n_col2:
+            energy_req = st.number_input(
+                "Energy (kcal/kg)",
+                min_value=1500.0, max_value=4500.0,
+                value=float(min(energy_default, 4500)),
+                step=50.0, key="ni_energy",
+                help="Minimum metabolisable energy in the final mix"
+            )
+        with n_col3:
+            feed_intake = st.number_input(
+                "Daily Feed Intake (kg)",
+                min_value=0.01, max_value=30.0,
+                value=float(st.session_state.get("feed_intake_val", 0.5)),
+                step=0.05, key="ni_intake",
+                help="Used for daily / monthly cost projections"
+            )
+
+        n_col4, n_col5, n_col6 = st.columns(3)
+        with n_col4:
+            use_fiber = st.checkbox("📏 Set Fiber Targets", key="ni_use_fiber")
+            if use_fiber:
+                min_fiber = st.number_input("Min Fiber (%)", 0.0, 30.0, max(0.0, fiber_default - 2), 0.5, key="ni_fmin")
+                max_fiber = st.number_input("Max Fiber (%)", 0.0, 40.0, fiber_default + 4, 0.5, key="ni_fmax")
+            else:
+                min_fiber, max_fiber = 0.0, 40.0
+        with n_col5:
+            limit_ingredients = st.checkbox("🔢 Limit Ingredient Count", key="ni_limit")
+            if limit_ingredients:
+                max_ingredients = st.slider("Max ingredients", 3, 15, 8, key="ni_max_ingr")
+            else:
+                max_ingredients = 15
+        with n_col6:
+            st.markdown("&nbsp;")  # spacer
+
+        # Keep sidebar sliders consistent (write-back so sidebar stays useful)
+        cp_req_final     = cp_req
+        energy_req_final = energy_req
+        feed_intake_final = feed_intake
+        st.session_state["feed_intake_val"] = feed_intake
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # ── ③ Run Optimiser ──────────────────────────────────────────────
+        st.markdown("<br>", unsafe_allow_html=True)
+        run_col, _ = st.columns([1, 2])
+        with run_col:
+            run_btn = st.button("🚀 Optimise Feed Formula", type="primary", use_container_width=True, key="run_opt")
+
+        if run_btn:
             with st.spinner("Calculating optimal feed mix…"):
                 try:
                     prob = LpProblem("FeedMix", LpMinimize)
@@ -1077,9 +1225,9 @@ def show_formulator():
                     vars = LpVariable.dicts("Ingr", ingredients, lowBound=0, upBound=1)
                     prob += lpSum(vars[i] * df[df["Ingredient"] == i]["Cost"].values[0] for i in ingredients)
                     prob += lpSum(vars[i] for i in ingredients) == 1
-                    prob += lpSum(vars[i] * df[df["Ingredient"] == i]["CP"].values[0] for i in ingredients) >= cp_req
-                    prob += lpSum(vars[i] * df[df["Ingredient"] == i]["Energy"].values[0] for i in ingredients) >= energy_req
-                    if use_fiber_constraint and 'Fiber' in df.columns:
+                    prob += lpSum(vars[i] * df[df["Ingredient"] == i]["CP"].values[0] for i in ingredients) >= cp_req_final
+                    prob += lpSum(vars[i] * df[df["Ingredient"] == i]["Energy"].values[0] for i in ingredients) >= energy_req_final
+                    if use_fiber and 'Fiber' in df.columns:
                         prob += lpSum(vars[i] * df[df["Ingredient"] == i]["Fiber"].values[0] for i in ingredients) >= min_fiber
                         prob += lpSum(vars[i] * df[df["Ingredient"] == i]["Fiber"].values[0] for i in ingredients) <= max_fiber
                     prob.solve()
@@ -1110,23 +1258,23 @@ def show_formulator():
                         st.session_state.formulation_history.append({
                             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'),
                             'animal': animal, 'age': age, 'weight': weight,
-                            'cp_req': cp_req, 'energy_req': energy_req, 'total_cost': total_cost
+                            'cp_req': cp_req_final, 'energy_req': energy_req_final, 'total_cost': total_cost
                         })
 
                         col1, col2, col3, col4 = st.columns(4)
                         with col1: st.metric("💰 Feed Cost/kg", f"₦{total_cost:.2f}")
-                        with col2: st.metric("📅 Daily Feed Cost", f"₦{total_cost * feed_intake:.2f}")
+                        with col2: st.metric("📅 Daily Feed Cost", f"₦{total_cost * feed_intake_final:.2f}")
                         with col3: st.metric("📦 Ingredients Used", len(result))
-                        with col4: st.metric("📆 Monthly Cost", f"₦{total_cost * feed_intake * 30:.2f}")
+                        with col4: st.metric("📆 Monthly Cost", f"₦{total_cost * feed_intake_final * 30:.2f}")
 
                         st.markdown("---")
                         st.subheader("✅ Nutritional Achievement")
                         col1, col2 = st.columns(2)
                         with col1:
-                            cp_pct = (total_cp / cp_req) * 100 if cp_req > 0 else 0
+                            cp_pct = (total_cp / cp_req_final) * 100 if cp_req_final > 0 else 0
                             st.metric("Crude Protein", f"{total_cp:.2f}%", delta=f"{cp_pct:.1f}% of requirement")
                         with col2:
-                            energy_pct = (total_energy / energy_req) * 100 if energy_req > 0 else 0
+                            energy_pct = (total_energy / energy_req_final) * 100 if energy_req_final > 0 else 0
                             st.metric("Energy", f"{total_energy:.0f} kcal/kg", delta=f"{energy_pct:.1f}% of requirement")
 
                         st.success(f"✅ Optimisation complete! Total cost: ₦{total_cost:.2f}/kg")
@@ -1155,13 +1303,13 @@ def show_formulator():
                                                file_name=f"{animal}_feed_formula_{datetime.now().strftime('%Y%m%d')}.csv",
                                                mime="text/csv", use_container_width=True)
                         with col2:
-                            report = generate_report(animal, age, weight, cp_req, energy_req,
-                                                     feed_intake, result_df, total_cost)
+                            report = generate_report(animal, age, weight, cp_req_final, energy_req_final,
+                                                     feed_intake_final, result_df, total_cost)
                             st.download_button(label="📄 Download Report (TXT)", data=report,
                                                file_name=f"{animal}_feed_report_{datetime.now().strftime('%Y%m%d')}.txt",
                                                mime="text/plain", use_container_width=True)
                     else:
-                        st.error("❌ No feasible solution found. Try adjusting your requirements or constraints.")
+                        st.error("❌ No feasible solution found. Try relaxing your nutrient targets or constraints.")
                 except Exception as e:
                     st.error(f"❌ Error during optimisation: {str(e)}")
 
@@ -1378,260 +1526,6 @@ elif st.session_state.page == 'breed_database':
     show_breed_database()
 elif st.session_state.page == 'formulator':
     show_formulator()
-
-st.markdown("""
-<style>
-
-/* ==================================================
-   VISIBILITY & OVERFLOW FIX
-   ================================================== */
-
-* {
-  word-break: break-word;
-}
-
-h1, h2, h3, h4, h5, h6 { line-height: 1.3; }
-p, span, label { line-height: 1.5; }
-
-/* ==================================================
-   METRIC CARDS — crisp labels + readable values
-   ================================================== */
-
-[data-testid="metric-container"] {
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
-  padding: 1rem 1.1rem !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.07) !important;
-}
-
-/* Label (e.g. "Feed Cost/kg") */
-[data-testid="metric-container"] label,
-[data-testid="stMetricLabel"] {
-  font-size: 0.78rem !important;
-  font-weight: 600 !important;
-  color: #64748b !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.04em !important;
-  white-space: normal !important;
-  overflow: visible !important;
-}
-
-/* Value (e.g. "₦240.00") */
-[data-testid="stMetricValue"] {
-  font-family: 'DM Serif Display', serif !important;
-  font-size: 1.55rem !important;
-  font-weight: 400 !important;
-  color: #1a2332 !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  line-height: 1.2 !important;
-}
-
-/* Delta (e.g. "+12.5%") */
-[data-testid="stMetricDelta"] {
-  font-size: 0.8rem !important;
-  font-weight: 500 !important;
-  white-space: normal !important;
-  overflow: visible !important;
-}
-
-/* ==================================================
-   TAB PANEL — white background so content is readable
-   ================================================== */
-
-.stTabs [data-baseweb="tab-panel"] {
-  background: #ffffff !important;
-  border-radius: 12px !important;
-  padding: 1.75rem 1.5rem !important;
-  border: 1px solid rgba(0,0,0,0.06) !important;
-  margin-top: 0.5rem !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
-}
-
-/* All text inside tabs */
-.stTabs [data-baseweb="tab-panel"] p,
-.stTabs [data-baseweb="tab-panel"] span,
-.stTabs [data-baseweb="tab-panel"] div,
-.stTabs [data-baseweb="tab-panel"] label,
-.stTabs [data-baseweb="tab-panel"] li {
-  color: #334155 !important;
-}
-
-.stTabs [data-baseweb="tab-panel"] h1,
-.stTabs [data-baseweb="tab-panel"] h2,
-.stTabs [data-baseweb="tab-panel"] h3,
-.stTabs [data-baseweb="tab-panel"] h4 {
-  color: #1a2332 !important;
-}
-
-/* ==================================================
-   SIDEBAR — clean white with readable text
-   ================================================== */
-
-[data-testid="stSidebar"] {
-  background: #ffffff !important;
-  border-right: 1px solid #e2e8f0 !important;
-}
-
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] p,
-[data-testid="stSidebar"] span,
-[data-testid="stSidebar"] div {
-  color: #334155 !important;
-}
-
-[data-testid="stSidebar"] [data-testid="stMetricValue"] {
-  color: #1a2332 !important;
-  font-size: 1.1rem !important;
-}
-
-[data-testid="stSidebar"] [data-testid="stMetricLabel"] {
-  color: #64748b !important;
-}
-
-/* Slider track and thumb */
-[data-testid="stSidebar"] [data-testid="stSlider"] label {
-  font-size: 0.85rem !important;
-  font-weight: 500 !important;
-  color: #334155 !important;
-}
-
-/* ==================================================
-   INPUTS, SELECTS, EXPANDERS — visible text
-   ================================================== */
-
-.stSelectbox label,
-.stSlider label,
-.stNumberInput label,
-.stTextInput label,
-.stCheckbox label {
-  font-size: 0.88rem !important;
-  font-weight: 500 !important;
-  color: #334155 !important;
-}
-
-/* Selectbox / text input value text */
-[data-baseweb="select"] span,
-[data-baseweb="input"] input,
-input[type="number"],
-input[type="text"] {
-  color: #1a2332 !important;
-}
-
-/* Expander header */
-[data-testid="stExpander"] summary {
-  font-weight: 600 !important;
-  font-size: 0.9rem !important;
-  color: #1d6b42 !important;
-}
-
-/* ==================================================
-   DATAFRAME / TABLE — crisp readable cells
-   ================================================== */
-
-[data-testid="stDataFrame"] {
-  border-radius: 8px !important;
-  overflow: hidden !important;
-  border: 1px solid #e2e8f0 !important;
-}
-
-[data-testid="stDataFrame"] th {
-  background: #f1f5f9 !important;
-  color: #334155 !important;
-  font-weight: 600 !important;
-  font-size: 0.82rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.04em !important;
-  padding: 0.6rem 0.8rem !important;
-  white-space: normal !important;
-}
-
-[data-testid="stDataFrame"] td {
-  color: #1a2332 !important;
-  font-size: 0.88rem !important;
-  padding: 0.5rem 0.8rem !important;
-  white-space: normal !important;
-  overflow: visible !important;
-}
-
-/* ==================================================
-   SUCCESS / INFO / WARNING BANNERS
-   ================================================== */
-
-[data-testid="stSuccess"] {
-  background: #f0faf5 !important;
-  border-left: 4px solid #2da868 !important;
-  color: #1a2332 !important;
-  border-radius: 8px !important;
-}
-
-[data-testid="stInfo"] {
-  background: #eff6ff !important;
-  border-left: 4px solid #3b82f6 !important;
-  color: #1a2332 !important;
-  border-radius: 8px !important;
-}
-
-[data-testid="stWarning"] {
-  background: #fdf0d5 !important;
-  border-left: 4px solid #e8a020 !important;
-  color: #1a2332 !important;
-  border-radius: 8px !important;
-}
-
-[data-testid="stError"] {
-  background: #fff0f0 !important;
-  border-left: 4px solid #e74c3c !important;
-  color: #1a2332 !important;
-  border-radius: 8px !important;
-}
-
-/* ==================================================
-   CAPTION TEXT
-   ================================================== */
-
-[data-testid="stCaptionContainer"] p {
-  color: #64748b !important;
-  font-size: 0.8rem !important;
-}
-
-/* ==================================================
-   DOWNLOAD / ACTION BUTTONS — text always visible
-   ================================================== */
-
-.stDownloadButton > button {
-  white-space: normal !important;
-  overflow: visible !important;
-  word-break: break-word !important;
-}
-
-/* ==================================================
-   MOBILE
-   ================================================== */
-
-@media (max-width: 768px) {
-  [data-testid="column"] {
-    width: 100% !important;
-    flex: 1 1 100% !important;
-  }
-  .stButton > button {
-    width: 100% !important;
-    font-size: 0.88rem !important;
-  }
-  [data-testid="stMetricValue"] {
-    font-size: 1.2rem !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .main .block-container { padding: 0 1rem 1.5rem; }
-  body { font-size: 0.9rem; }
-  [data-testid="stMetricValue"] { font-size: 1rem !important; }
-}
-
-</style>
-""", unsafe_allow_html=True)
 
 # ── Footer ──
 st.markdown("""

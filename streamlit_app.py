@@ -683,12 +683,17 @@ RESPONSIVE_CSS = """
   }
 }
 
-@media (max-width: 768px) {
-  /* Stack all Streamlit columns vertically */
-  [data-testid="column"] {
-    width: 100% !important;
-    flex: 1 1 100% !important;
+st.markdown("""
+<style>
+
+@media (max-width: 1024px) {
+  .main .block-container {
+    padding: 0 1.25rem 2rem;
   }
+}
+
+</style>
+""", unsafe_allow_html=True)
 
   .hero-wrap {
     padding: 2.5rem 1.6rem;

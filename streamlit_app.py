@@ -1513,6 +1513,84 @@ st.markdown("""
 
 </style>
 """, unsafe_allow_html=True)
+st.markdown("""
+<style>
+
+/* ===============================
+   UNIVERSAL TEXT & NUMBER VISIBILITY FIX
+   =============================== */
+
+/* Allow wrapping everywhere */
+* {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  word-break: break-word;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.25;
+}
+
+/* Paragraphs & markdown */
+p, span, div, label {
+  line-height: 1.4;
+}
+
+/* METRICS (numbers visibility) */
+[data-testid="stMetricValue"] {
+  white-space: normal !important;
+  overflow: visible !important;
+  font-size: 1.1rem;
+}
+
+[data-testid="stMetricLabel"] {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+/* Tables & dataframes */
+[data-testid="stDataFrame"] * {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+/* Inputs & sliders */
+input, textarea, select {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+/* Buttons */
+.stButton > button {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+/* Charts (numbers & labels) */
+svg text {
+  white-space: normal !important;
+}
+
+/* MOBILE SAFETY */
+@media (max-width: 480px) {
+
+  body {
+    font-size: 0.9rem;
+  }
+
+  [data-testid="stMetricValue"] {
+    font-size: 1rem !important;
+  }
+
+  table {
+    font-size: 0.85rem;
+  }
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 
 # ── Footer ──

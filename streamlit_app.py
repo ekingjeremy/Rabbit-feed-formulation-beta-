@@ -1383,156 +1383,251 @@ st.markdown("""
 <style>
 
 /* ==================================================
-   GLOBAL RESET — VISIBILITY FIRST
+   VISIBILITY & OVERFLOW FIX
    ================================================== */
 
 * {
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
   word-break: break-word;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  line-height: 1.25;
-}
-
-p, span, div, label {
-  line-height: 1.4;
-}
+h1, h2, h3, h4, h5, h6 { line-height: 1.3; }
+p, span, label { line-height: 1.5; }
 
 /* ==================================================
-   COLOR SYSTEM
+   METRIC CARDS — crisp labels + readable values
    ================================================== */
-
-:root {
-  --primary-green: #2f6f55;
-  --accent-green: #6fae92;
-  --bg-black: #0f1115;
-  --bg-card: #161a22;
-  --bg-light: #fafafa;
-  --text-main: #e5e7eb;
-  --text-muted: #9ca3af;
-}
-
-/* ==================================================
-   APP BACKGROUND (BLACK MODE)
-   ================================================== */
-
-.stApp {
-  background-color: var(--bg-black);
-  color: var(--text-main);
-}
-
-/* Main content cards */
-.main .block-container {
-  background-color: var(--bg-card);
-  border-radius: 12px;
-  padding-bottom: 2rem;
-}
-
-/* ==================================================
-   BUTTONS & TABS
-   ================================================== */
-
-.stButton > button {
-  white-space: normal !important;
-  overflow: visible !important;
-}
-
-.stButton > button[kind="primary"] {
-  background-color: var(--primary-green) !important;
-  border: none !important;
-  color: #ffffff !important;
-}
-
-.stButton > button[kind="primary"]:hover {
-  background-color: #285e48 !important;
-}
-
-.stTabs [role="tab"][aria-selected="true"] {
-  background-color: var(--primary-green) !important;
-  color: #ffffff !important;
-  border-radius: 8px;
-}
-
-/* ==================================================
-   METRICS — NUMBERS NEVER CUT OFF
-   ================================================== */
-
-[data-testid="stMetricValue"] {
-  white-space: normal !important;
-  overflow: visible !important;
-  font-size: 1.1rem;
-}
-
-[data-testid="stMetricLabel"] {
-  white-space: normal !important;
-  overflow: visible !important;
-  color: var(--text-muted);
-}
 
 [data-testid="metric-container"] {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 1rem 1.1rem !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07) !important;
+}
+
+/* Label (e.g. "Feed Cost/kg") */
+[data-testid="metric-container"] label,
+[data-testid="stMetricLabel"] {
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+/* Value (e.g. "₦240.00") */
+[data-testid="stMetricValue"] {
+  font-family: 'DM Serif Display', serif !important;
+  font-size: 1.55rem !important;
+  font-weight: 400 !important;
+  color: #1a2332 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  line-height: 1.2 !important;
+}
+
+/* Delta (e.g. "+12.5%") */
+[data-testid="stMetricDelta"] {
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+/* ==================================================
+   TAB PANEL — white background so content is readable
+   ================================================== */
+
+.stTabs [data-baseweb="tab-panel"] {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  padding: 1.75rem 1.5rem !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  margin-top: 0.5rem !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+
+/* All text inside tabs */
+.stTabs [data-baseweb="tab-panel"] p,
+.stTabs [data-baseweb="tab-panel"] span,
+.stTabs [data-baseweb="tab-panel"] div,
+.stTabs [data-baseweb="tab-panel"] label,
+.stTabs [data-baseweb="tab-panel"] li {
+  color: #334155 !important;
+}
+
+.stTabs [data-baseweb="tab-panel"] h1,
+.stTabs [data-baseweb="tab-panel"] h2,
+.stTabs [data-baseweb="tab-panel"] h3,
+.stTabs [data-baseweb="tab-panel"] h4 {
+  color: #1a2332 !important;
+}
+
+/* ==================================================
+   SIDEBAR — clean white with readable text
+   ================================================== */
+
+[data-testid="stSidebar"] {
+  background: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
+}
+
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] div {
+  color: #334155 !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stMetricValue"] {
+  color: #1a2332 !important;
+  font-size: 1.1rem !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stMetricLabel"] {
+  color: #64748b !important;
+}
+
+/* Slider track and thumb */
+[data-testid="stSidebar"] [data-testid="stSlider"] label {
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  color: #334155 !important;
+}
+
+/* ==================================================
+   INPUTS, SELECTS, EXPANDERS — visible text
+   ================================================== */
+
+.stSelectbox label,
+.stSlider label,
+.stNumberInput label,
+.stTextInput label,
+.stCheckbox label {
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  color: #334155 !important;
+}
+
+/* Selectbox / text input value text */
+[data-baseweb="select"] span,
+[data-baseweb="input"] input,
+input[type="number"],
+input[type="text"] {
+  color: #1a2332 !important;
+}
+
+/* Expander header */
+[data-testid="stExpander"] summary {
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  color: #1d6b42 !important;
+}
+
+/* ==================================================
+   DATAFRAME / TABLE — crisp readable cells
+   ================================================== */
+
+[data-testid="stDataFrame"] {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-testid="stDataFrame"] th {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
   padding: 0.6rem 0.8rem !important;
+  white-space: normal !important;
 }
 
-/* ==================================================
-   TABLES, INPUTS, CHART TEXT
-   ================================================== */
-
-[data-testid="stDataFrame"] * {
+[data-testid="stDataFrame"] td {
+  color: #1a2332 !important;
+  font-size: 0.88rem !important;
+  padding: 0.5rem 0.8rem !important;
   white-space: normal !important;
   overflow: visible !important;
 }
 
-input, textarea, select {
-  white-space: normal !important;
-  overflow: visible !important;
+/* ==================================================
+   SUCCESS / INFO / WARNING BANNERS
+   ================================================== */
+
+[data-testid="stSuccess"] {
+  background: #f0faf5 !important;
+  border-left: 4px solid #2da868 !important;
+  color: #1a2332 !important;
+  border-radius: 8px !important;
 }
 
-svg text {
-  white-space: normal !important;
+[data-testid="stInfo"] {
+  background: #eff6ff !important;
+  border-left: 4px solid #3b82f6 !important;
+  color: #1a2332 !important;
+  border-radius: 8px !important;
+}
+
+[data-testid="stWarning"] {
+  background: #fdf0d5 !important;
+  border-left: 4px solid #e8a020 !important;
+  color: #1a2332 !important;
+  border-radius: 8px !important;
+}
+
+[data-testid="stError"] {
+  background: #fff0f0 !important;
+  border-left: 4px solid #e74c3c !important;
+  color: #1a2332 !important;
+  border-radius: 8px !important;
 }
 
 /* ==================================================
-   MOBILE RESPONSIVENESS
+   CAPTION TEXT
    ================================================== */
 
-@media (max-width: 1024px) {
-  .main .block-container {
-    padding: 0 1.25rem 2rem;
-  }
+[data-testid="stCaptionContainer"] p {
+  color: #64748b !important;
+  font-size: 0.8rem !important;
 }
+
+/* ==================================================
+   DOWNLOAD / ACTION BUTTONS — text always visible
+   ================================================== */
+
+.stDownloadButton > button {
+  white-space: normal !important;
+  overflow: visible !important;
+  word-break: break-word !important;
+}
+
+/* ==================================================
+   MOBILE
+   ================================================== */
 
 @media (max-width: 768px) {
   [data-testid="column"] {
     width: 100% !important;
     flex: 1 1 100% !important;
   }
-
   .stButton > button {
     width: 100% !important;
-    padding: 0.6rem 1rem !important;
-    font-size: 0.9rem !important;
+    font-size: 0.88rem !important;
+  }
+  [data-testid="stMetricValue"] {
+    font-size: 1.2rem !important;
   }
 }
 
 @media (max-width: 480px) {
-  .main .block-container {
-    padding: 0 1rem 1.5rem;
-  }
-
-  body {
-    font-size: 0.9rem;
-  }
-
-  [data-testid="stMetricValue"] {
-    font-size: 1rem !important;
-  }
-
-  table {
-    font-size: 0.85rem;
-  }
+  .main .block-container { padding: 0 1rem 1.5rem; }
+  body { font-size: 0.9rem; }
+  [data-testid="stMetricValue"] { font-size: 1rem !important; }
 }
 
 </style>

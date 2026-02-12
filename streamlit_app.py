@@ -564,6 +564,34 @@ if 'page' not in st.session_state:
 if 'formulation_history' not in st.session_state:
     st.session_state.formulation_history = []
 
+# Sidebar inputs
+    st.sidebar.header("🎯 Animal Parameters")
+    st.sidebar.markdown("---")
+    
+    # Show selected breed if available
+    if 'selected_breed' in st.session_state:
+        st.sidebar.success(f"✓ Breed: {st.session_state.selected_breed}")
+
+    age = st.sidebar.slider("Age (weeks)", 1, 120, 8)
+    weight = st.sidebar.slider("Body Weight (kg)", 0.1, 600.0, 2.0)
+    cp_req = st.sidebar.slider("Crude Protein Requirement (%)", 10, 30, 18)
+    energy_req = st.sidebar.slider("Energy Requirement (Kcal/kg)", 2000, 12000, 3000)
+    feed_intake = st.sidebar.slider("Feed Intake (kg/day)", 0.05, 30.0, 0.5)
+
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 📊 Current Selection")
+    st.sidebar.metric("Animal", animal)
+    st.sidebar.metric("Ingredients Available", len(df))
+    
+    # Quick links
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🔗 Quick Links")
+    if st.sidebar.button("📖 Nutrient Guide", use_container_width=True):
+        st.session_state.page = 'nutrient_guide'
+        st.rerun()
+    if st.sidebar.button("🐾 Breed Database", use_container_width=True):
+        st.session_state.page = 'breed_database'
+        st.rerun()
 
 def generate_report(animal, age, weight, cp_req, energy_req, feed_intake,
                     result_df=None, total_cost=None, prediction=None):

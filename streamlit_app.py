@@ -1480,6 +1480,40 @@ small, .stMarkdown p {
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+
+/* ===============================
+   FIX METRIC NUMBERS CLIPPING
+   =============================== */
+
+/* Allow metric values to wrap instead of overflow */
+[data-testid="stMetricValue"] {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  font-size: 1.1rem;
+}
+
+/* Adjust metric container spacing (mobile-safe) */
+[data-testid="metric-container"] {
+  padding: 0.6rem 0.8rem !important;
+}
+
+/* Smaller screens */
+@media (max-width: 480px) {
+  [data-testid="stMetricValue"] {
+    font-size: 1rem !important;
+  }
+
+  [data-testid="stMetricLabel"] {
+    font-size: 0.75rem !important;
+  }
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 # ── Footer ──
 st.markdown("""

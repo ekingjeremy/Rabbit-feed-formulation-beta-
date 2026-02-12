@@ -657,6 +657,136 @@ def render_navbar():
 
 def show_home():
     render_navbar()
+st.markdown("""
+<style>
+    # This patch ONLY adjusts responsiveness (mobile) and color harmony.
+# Functionality and layout logic are unchanged.
+
+# Add the following CSS at the END of your existing st.markdown(<style>...</style>) block
+
+RESPONSIVE_CSS = """
+/* ===============================
+   MOBILE & TABLET RESPONSIVENESS
+   =============================== */
+
+@media (max-width: 1024px) {
+  .main .block-container {
+    padding: 0 1.25rem 2rem 1.25rem;
+  }
+
+  .hero-wrap {
+    padding: 3rem 2.2rem;
+  }
+
+  .hero-heading {
+    font-size: 2.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Stack all Streamlit columns vertically */
+  [data-testid="column"] {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  .hero-wrap {
+    padding: 2.5rem 1.6rem;
+    border-radius: 16px;
+  }
+
+  .hero-heading {
+    font-size: 2.15rem;
+    line-height: 1.2;
+  }
+
+  .hero-body {
+    font-size: 0.95rem;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .section-heading {
+    font-size: 1.35rem;
+  }
+
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .steps-row {
+    flex-direction: column;
+  }
+
+  .step-connector {
+    display: none;
+  }
+
+  .footer-wrap {
+    flex-direction: column;
+    gap: 1.2rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-heading {
+    font-size: 1.9rem;
+  }
+
+  .hero-tag {
+    font-size: 0.65rem;
+  }
+
+  .card,
+  .feature-card,
+  .breed-card-wrap {
+    padding: 1.1rem;
+  }
+
+  .stButton > button {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  [data-testid="metric-container"] {
+    padding: 0.75rem 0.85rem;
+  }
+}
+
+/* ===============================
+   COLOR HARMONY REFINEMENT
+   (Same palette – better contrast)
+   =============================== */
+
+:root {
+  --green-700: #1f7a4a;   /* softened for readability */
+  --green-500: #2fbf71;   /* fresher accent */
+  --slate-900: #16202e;   /* slightly warmer dark */
+  --slate-500: #6b7280;   /* smoother body text */
+}
+
+.stApp {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.stTabs [role="tab"][aria-selected="true"] {
+  background: linear-gradient(135deg, var(--green-700), var(--green-500)) !important;
+}
+
+.stButton > button[kind="primary"] {
+  background: linear-gradient(135deg, var(--green-700), var(--green-500)) !important;
+}
+"""
+
+# Then inject it like this (do NOT remove your existing CSS):
+# st.markdown(f"<style>{RESPONSIVE_CSS}</style>", unsafe_allow_html=True)
+
+</style>
+""", unsafe_allow_html=True)
 
     st.markdown("""
     <div class="hero-wrap">

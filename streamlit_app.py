@@ -657,43 +657,6 @@ def render_navbar():
 
 def show_home():
     render_navbar()
-st.markdown("""
-<style>
-    # This patch ONLY adjusts responsiveness (mobile) and color harmony.
-# Functionality and layout logic are unchanged.
-
-# Add the following CSS at the END of your existing st.markdown(<style>...</style>) block
-
-RESPONSIVE_CSS = """
-/* ===============================
-   MOBILE & TABLET RESPONSIVENESS
-   =============================== */
-
-@media (max-width: 1024px) {
-  .main .block-container {
-    padding: 0 1.25rem 2rem 1.25rem;
-  }
-
-  .hero-wrap {
-    padding: 3rem 2.2rem;
-  }
-
-  .hero-heading {
-    font-size: 2.6rem;
-  }
-}
-
-st.markdown("""
-<style>
-
-@media (max-width: 1024px) {
-  .main .block-container {
-    padding: 0 1.25rem 2rem;
-  }
-}
-
-</style>
-""", unsafe_allow_html=True)
 
   .hero-wrap {
     padding: 2.5rem 1.6rem;
@@ -789,6 +752,55 @@ st.markdown("""
 
 # Then inject it like this (do NOT remove your existing CSS):
 # st.markdown(f"<style>{RESPONSIVE_CSS}</style>", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+
+/* ===============================
+   MOBILE RESPONSIVENESS
+   =============================== */
+
+@media (max-width: 1024px) {
+  .main .block-container {
+    padding: 0 1.25rem 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-testid="column"] {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  .stButton > button {
+    width: 100% !important;
+    padding: 0.6rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .main .block-container {
+    padding: 0 1rem 1.5rem;
+  }
+}
+
+/* ===============================
+   COLOR BLENDING
+   =============================== */
+
+.stApp {
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+.stButton > button[kind="primary"] {
+  background: linear-gradient(135deg, #1f7a4a, #2fbf71) !important;
+  border: none !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 </style>
 """, unsafe_allow_html=True)

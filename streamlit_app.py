@@ -1380,9 +1380,132 @@ elif st.session_state.page == 'formulator':
 st.markdown("""
 <style>
 
-/* ===============================
+/* ==================================================
+   GLOBAL RESET — VISIBILITY FIRST
+   ================================================== */
+
+* {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  word-break: break-word;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.25;
+}
+
+p, span, div, label {
+  line-height: 1.4;
+}
+
+/* ==================================================
+   COLOR SYSTEM
+   ================================================== */
+
+:root {
+  --primary-green: #2f6f55;
+  --accent-green: #6fae92;
+  --bg-black: #0f1115;
+  --bg-card: #161a22;
+  --bg-light: #fafafa;
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+}
+
+/* ==================================================
+   APP BACKGROUND (BLACK MODE)
+   ================================================== */
+
+.stApp {
+  background-color: var(--bg-black);
+  color: var(--text-main);
+}
+
+/* Main content cards */
+.main .block-container {
+  background-color: var(--bg-card);
+  border-radius: 12px;
+  padding-bottom: 2rem;
+}
+
+/* ==================================================
+   LANDING PAGE OVERRIDE (LIGHT)
+   ================================================== */
+/* This keeps ONLY the landing/hero section light */
+
+.hero-wrap,
+.hero-wrap * {
+  background-color: var(--bg-light) !important;
+  color: #1f2937 !important;
+}
+
+/* ==================================================
+   BUTTONS & TABS
+   ================================================== */
+
+.stButton > button {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+.stButton > button[kind="primary"] {
+  background-color: var(--primary-green) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+.stButton > button[kind="primary"]:hover {
+  background-color: #285e48 !important;
+}
+
+.stTabs [role="tab"][aria-selected="true"] {
+  background-color: var(--primary-green) !important;
+  color: #ffffff !important;
+  border-radius: 8px;
+}
+
+/* ==================================================
+   METRICS — NUMBERS NEVER CUT OFF
+   ================================================== */
+
+[data-testid="stMetricValue"] {
+  white-space: normal !important;
+  overflow: visible !important;
+  font-size: 1.1rem;
+}
+
+[data-testid="stMetricLabel"] {
+  white-space: normal !important;
+  overflow: visible !important;
+  color: var(--text-muted);
+}
+
+[data-testid="metric-container"] {
+  padding: 0.6rem 0.8rem !important;
+}
+
+/* ==================================================
+   TABLES, INPUTS, CHART TEXT
+   ================================================== */
+
+[data-testid="stDataFrame"] * {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+input, textarea, select {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+svg text {
+  white-space: normal !important;
+}
+
+/* ==================================================
    MOBILE RESPONSIVENESS
-   =============================== */
+   ================================================== */
 
 @media (max-width: 1024px) {
   .main .block-container {
@@ -1407,174 +1530,6 @@ st.markdown("""
   .main .block-container {
     padding: 0 1rem 1.5rem;
   }
-}
-
-/* ===============================
-   COLOR BLENDING
-   =============================== */
-
-.stApp {
-  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
-}
-
-.stButton > button[kind="primary"] {
-  background: linear-gradient(135deg, #1f7a4a, #2fbf71) !important;
-  border: none !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<style>
-
-/* ===============================
-   SOFT AGRI-TECH COLOR PALETTE
-   =============================== */
-
-:root {
-  --primary-green: #2f6f55;
-  --accent-green: #6fae92;
-  --background-main: #fafafa;
-  --background-soft: #f3f6f4;
-  --text-main: #2b2b2b;
-  --text-muted: #6b7280;
-}
-
-/* App background */
-.stApp {
-  background-color: var(--background-soft);
-  color: var(--text-main);
-}
-
-/* Main content card feel */
-.main .block-container {
-  background-color: var(--background-main);
-  border-radius: 12px;
-}
-
-/* Primary buttons */
-.stButton > button[kind="primary"] {
-  background-color: var(--primary-green) !important;
-  border: none !important;
-  color: #ffffff !important;
-}
-
-/* Hover state */
-.stButton > button[kind="primary"]:hover {
-  background-color: #285e48 !important;
-}
-
-/* Tabs */
-.stTabs [role="tab"][aria-selected="true"] {
-  background-color: var(--primary-green) !important;
-  color: #ffffff !important;
-  border-radius: 8px;
-}
-
-/* Secondary text */
-small, .stMarkdown p {
-  color: var(--text-muted);
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<style>
-
-/* ===============================
-   FIX METRIC NUMBERS CLIPPING
-   =============================== */
-
-/* Allow metric values to wrap instead of overflow */
-[data-testid="stMetricValue"] {
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
-  font-size: 1.1rem;
-}
-
-/* Adjust metric container spacing (mobile-safe) */
-[data-testid="metric-container"] {
-  padding: 0.6rem 0.8rem !important;
-}
-
-/* Smaller screens */
-@media (max-width: 480px) {
-  [data-testid="stMetricValue"] {
-    font-size: 1rem !important;
-  }
-
-  [data-testid="stMetricLabel"] {
-    font-size: 0.75rem !important;
-  }
-}
-
-</style>
-""", unsafe_allow_html=True)
-st.markdown("""
-<style>
-
-/* ===============================
-   UNIVERSAL TEXT & NUMBER VISIBILITY FIX
-   =============================== */
-
-/* Allow wrapping everywhere */
-* {
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
-  word-break: break-word;
-}
-
-/* Headings */
-h1, h2, h3, h4, h5, h6 {
-  line-height: 1.25;
-}
-
-/* Paragraphs & markdown */
-p, span, div, label {
-  line-height: 1.4;
-}
-
-/* METRICS (numbers visibility) */
-[data-testid="stMetricValue"] {
-  white-space: normal !important;
-  overflow: visible !important;
-  font-size: 1.1rem;
-}
-
-[data-testid="stMetricLabel"] {
-  white-space: normal !important;
-  overflow: visible !important;
-}
-
-/* Tables & dataframes */
-[data-testid="stDataFrame"] * {
-  white-space: normal !important;
-  overflow: visible !important;
-}
-
-/* Inputs & sliders */
-input, textarea, select {
-  white-space: normal !important;
-  overflow: visible !important;
-}
-
-/* Buttons */
-.stButton > button {
-  white-space: normal !important;
-  overflow: visible !important;
-}
-
-/* Charts (numbers & labels) */
-svg text {
-  white-space: normal !important;
-}
-
-/* MOBILE SAFETY */
-@media (max-width: 480px) {
 
   body {
     font-size: 0.9rem;

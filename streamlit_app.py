@@ -1536,6 +1536,59 @@ svg text {
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+
+/* =====================================
+   HIGH-CONTRAST TEXT (DARK MODE)
+   ===================================== */
+
+/* Main readable text */
+body, p, span, div, label,
+h1, h2, h3, h4, h5, h6 {
+  color: #f9fafb !important;
+}
+
+/* Paragraphs & markdown */
+.stMarkdown p {
+  color: #f9fafb !important;
+}
+
+/* Metric values (numbers POP) */
+[data-testid="stMetricValue"] {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* Metric labels (still readable, not dull) */
+[data-testid="stMetricLabel"] {
+  color: #d1d5db !important;
+}
+
+/* Tables */
+table, th, td {
+  color: #f9fafb !important;
+}
+
+/* Inputs text */
+input, textarea, select {
+  color: #ffffff !important;
+}
+
+/* Secondary/helper text (kept softer on purpose) */
+small {
+  color: #d1d5db !important;
+}
+
+/* Landing page stays dark-text-on-light */
+.hero-wrap,
+.hero-wrap * {
+  color: #1f2937 !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 # ── Footer ──
 st.markdown("""

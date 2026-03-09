@@ -104,81 +104,203 @@ CSS = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
 
-    /* ── DESIGN TOKENS ── */
+    /* ================================
+       THEME TOKENS
+    ================================ */
     :root {
-        --g900: #0b2518;
-        --g800: #13472c;
-        --g700: #1a6640;
-        --g600: #208550;
-        --g500: #28a462;
-        --g400: #45c47c;
-        --g300: #7ddba8;
-        --g200: #b6eecf;
-        --g100: #dff6ec;
-        --g50:  #f0fbf5;
-
-        --amber:       #d97706;
-        --amber-light: #fef3c7;
-        --red:         #dc2626;
-
-        /* Light-mode surface tokens */
-        --bg:          #f4f7f5;
-        --surface:     #ffffff;
-        --surface-2:   #f8faf9;
-        --surface-3:   #edf4f0;
-        --border:      #d1e4d9;
-        --border-s:    #b0cebc;
-
-        /* Light-mode text tokens */
-        --tx:          #0f2d1e;
-        --tx-2:        #2d5040;
-        --tx-3:        #567a68;
-        --tx-inv:      #ffffff;
-
-        --shadow-s: 0 1px 3px rgba(16,68,40,.07), 0 1px 2px rgba(16,68,40,.05);
-        --shadow-m: 0 4px 16px rgba(16,68,40,.09), 0 2px 6px rgba(16,68,40,.06);
-        --shadow-l: 0 12px 40px rgba(16,68,40,.13), 0 4px 12px rgba(16,68,40,.08);
-
-        --r:    12px;
-        --r-lg: 20px;
-        --r-sm: 8px;
+        --g900:#0a2417;
+        --g800:#123f29;
+        --g700:#1a6640;
+        --g600:#208550;
+        --g500:#28a462;
+        --g400:#45c47c;
+        --g300:#7ddba8;
+        --g200:#b6eecf;
+        --g100:#e4f8ef;
+        --g50:#f3fdf7;
+        /* accent */
+        --amber:#d97706;
+        --amber-light:#fff4d6;
+        --red:#dc2626;
+        /* surfaces */
+        --bg:#f6f9f7;
+        --surface:#ffffff;
+        --surface-2:#f9fbfa;
+        --surface-3:#eef5f1;
+        /* borders */
+        --border:#d6e6dd;
+        --border-s:#bdd6c7;
+        /* text */
+        --tx:#0d2a1c;
+        --tx-2:#355a49;
+        --tx-3:#6c8f7f;
+        --tx-inv:#ffffff;
+        /* shadows */
+        --shadow-s:0 1px 3px rgba(0,0,0,.05);
+        --shadow-m:0 6px 20px rgba(0,0,0,.07);
+        --shadow-l:0 12px 40px rgba(0,0,0,.12);
+        /* radius */
+        --r:12px;
+        --r-lg:20px;
+        --r-sm:8px;
     }
 
-    /* ── DARK MODE (Streamlit theme injection) ── */
+    /* ================================
+       DARK MODE
+    ================================ */
     [data-theme="dark"] {
-        --bg:        #0c1610;
-        --surface:   #162014;
-        --surface-2: #1c2c1f;
-        --surface-3: #233328;
-        --border:    rgba(69,196,124,.15);
-        --border-s:  rgba(69,196,124,.28);
-
-        --tx:   #d6f0e4;
-        --tx-2: #9dccb5;
-        --tx-3: #6aab8a;
-        --tx-inv: #0c1610;
-
-        --shadow-s: 0 1px 3px rgba(0,0,0,.5);
-        --shadow-m: 0 4px 16px rgba(0,0,0,.5);
-        --shadow-l: 0 12px 40px rgba(0,0,0,.6);
+        --bg:#0f1c16;
+        --surface:#16261e;
+        --surface-2:#1c3026;
+        --surface-3:#223a2e;
+        --border:#29463a;
+        --border-s:#335a49;
+        --tx:#e6f4ec;
+        --tx-2:#b6d6c6;
+        --tx-3:#8fb5a3;
+        --shadow-s:none;
+        --shadow-m:none;
+        --shadow-l:none;
     }
 
-    /* ── RESET & BASE ── */
+    /* ================================
+       BASE LAYOUT
+    ================================ */
     html, body, [class*="css"] {
         font-family: 'DM Sans', sans-serif;
         color: var(--tx);
     }
-    .stApp { background: var(--bg) !important; }
-    .main .block-container { padding: 0 2rem 4rem; max-width: 1300px; }
+    .stApp {
+        background: var(--bg);
+        color: var(--tx);
+    }
+    .main .block-container {
+        padding: 2rem 2rem 4rem;
+        max-width: 1200px;
+    }
     #MainMenu, footer, header { visibility: hidden; }
 
-    /* ── CARDS ── */
+    /* ================================
+       SIDEBAR
+    ================================ */
+    section[data-testid="stSidebar"] {
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+    }
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] .stMarkdown { color: var(--tx-2) !important; }
+    [data-testid="stSidebar"] [data-testid="stMetricValue"] { color: var(--tx) !important; font-size:1.1rem !important; }
+    [data-testid="stSidebar"] [data-testid="stMetricLabel"] { color: var(--tx-3) !important; }
+    [data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,[data-testid="stSidebar"] h4 { color: var(--tx) !important; }
+
+    /* ================================
+       BUTTONS
+    ================================ */
+    .stButton > button {
+        background: var(--g600);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: .55rem 1rem;
+        font-family: 'DM Sans', sans-serif !important;
+        font-weight: 600 !important;
+        transition: .2s;
+        white-space: normal !important;
+    }
+    .stButton > button:hover {
+        background: var(--g700);
+        transform: translateY(-1px);
+    }
+    .stButton > button[kind="primary"] {
+        background: var(--g600) !important;
+        border: none !important;
+        color: #fff !important;
+    }
+    .stButton > button[kind="primary"]:hover {
+        background: var(--g700) !important;
+        box-shadow: 0 6px 20px rgba(32,133,80,.3) !important;
+        transform: translateY(-1px) !important;
+    }
+    .stButton > button[kind="secondary"] {
+        background: var(--surface) !important;
+        border: 1.5px solid var(--border-s) !important;
+        color: var(--tx-2) !important;
+    }
+    .stButton > button[kind="secondary"]:hover {
+        border-color: var(--g500) !important;
+        color: var(--g700) !important;
+        background: var(--surface-2) !important;
+    }
+
+    /* ================================
+       METRICS
+    ================================ */
+    [data-testid="stMetric"],
+    [data-testid="metric-container"] {
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 12px !important;
+        padding: .7rem 1rem !important;
+        box-shadow: var(--shadow-s) !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: .76rem !important;
+        font-weight: 600 !important;
+        color: var(--tx-3) !important;
+        text-transform: uppercase !important;
+        letter-spacing: .04em !important;
+        white-space: normal !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-family: 'DM Serif Display', serif !important;
+        font-size: 1.5rem !important;
+        color: var(--tx) !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        line-height: 1.2 !important;
+    }
+    [data-testid="stMetricDelta"] { font-size: .8rem !important; }
+
+    /* ================================
+       INPUTS
+    ================================ */
+    .stTextInput input,
+    .stNumberInput input,
+    input[type="number"],
+    input[type="text"] {
+        border-radius: 10px !important;
+        border: 1px solid var(--border) !important;
+        background: var(--surface) !important;
+        color: var(--tx) !important;
+    }
+    .stSelectbox div[data-baseweb="select"],
+    [data-baseweb="select"] > div {
+        border-radius: 10px !important;
+        border: 1px solid var(--border) !important;
+        background: var(--surface) !important;
+        color: var(--tx) !important;
+    }
+    [data-baseweb="select"] span { color: var(--tx) !important; }
+    .stSelectbox label, .stSlider label, .stNumberInput label,
+    .stTextInput label, .stCheckbox label {
+        font-size: .88rem !important;
+        font-weight: 500 !important;
+        color: var(--tx-2) !important;
+    }
+
+    /* ================================
+       CARDS
+    ================================ */
     .card {
         background: var(--surface);
-        border-radius: var(--r);
-        padding: 1.5rem;
         border: 1px solid var(--border);
+        border-radius: var(--r);
         box-shadow: var(--shadow-s);
+        padding: 1rem;
         transition: box-shadow .25s, transform .2s, background .25s;
     }
     .card:hover { background: var(--surface-2); box-shadow: var(--shadow-m); transform: translateY(-2px); }
@@ -203,11 +325,12 @@ CSS = """
     [data-theme="dark"] .feat-icon.amber  { background: rgba(217,119,6,.18); }
     [data-theme="dark"] .feat-icon.blue   { background: rgba(59,130,246,.18); }
     [data-theme="dark"] .feat-icon.purple { background: rgba(139,92,246,.18); }
-
     .feat-title { font-weight:600; font-size:.95rem; color:var(--tx); margin-bottom:.4rem; }
     .feat-body  { font-size:.85rem; color:var(--tx-3); line-height:1.6; }
 
-    /* ── HERO ── */
+    /* ================================
+       HERO
+    ================================ */
     .hero-wrap {
         background: linear-gradient(135deg, var(--g900) 0%, var(--g700) 55%, var(--g500) 100%);
         border-radius: var(--r-lg);
@@ -226,36 +349,18 @@ CSS = """
     .hero-stat-num   { font-family:'DM Serif Display',serif; font-size:2rem; color:#fff; line-height:1; }
     .hero-stat-label { font-size:.78rem; color:rgba(255,255,255,.55); text-transform:uppercase; letter-spacing:.05em; margin-top:.25rem; }
 
-    /* ── BUTTONS ── */
-    .stButton > button {
-        font-family: 'DM Sans', sans-serif !important;
-        font-weight: 600 !important;
-        border-radius: var(--r-sm) !important;
-        transition: all .2s !important;
-        white-space: normal !important;
-    }
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, var(--g700), var(--g500)) !important;
-        border: none !important;
-        color: #fff !important;
-        padding: .55rem 1.5rem !important;
-    }
-    .stButton > button[kind="primary"]:hover { box-shadow: 0 6px 20px rgba(32,133,80,.35) !important; transform: translateY(-1px) !important; }
-    .stButton > button[kind="secondary"] {
-        background: var(--surface) !important;
-        border: 1.5px solid var(--border-s) !important;
-        color: var(--tx-2) !important;
-    }
-    .stButton > button[kind="secondary"]:hover { border-color: var(--g500) !important; color: var(--g700) !important; }
-
-    /* ── TYPOGRAPHY HELPERS ── */
+    /* ================================
+       TYPOGRAPHY HELPERS
+    ================================ */
     .section-heading { font-family:'DM Serif Display',serif; font-size:1.6rem; color:var(--tx); margin-bottom:.3rem; }
     .section-sub     { font-size:.9rem; color:var(--tx-3); margin-bottom:1.5rem; }
     .page-header     { margin-bottom:1.75rem; }
     .page-title      { font-family:'DM Serif Display',serif; font-size:2.2rem; color:var(--tx); line-height:1.2; margin-bottom:.4rem; }
     .page-desc       { font-size:.95rem; color:var(--tx-3); max-width:600px; }
 
-    /* ── HOW IT WORKS STEPS ── */
+    /* ================================
+       HOW IT WORKS STEPS
+    ================================ */
     .steps-card { background:var(--surface); border-radius:var(--r); padding:1.5rem 2rem; border:1px solid var(--border); box-shadow:var(--shadow-s); }
     .steps-row  { display:flex; gap:0; position:relative; }
     .step-item  { flex:1; text-align:center; padding:1.5rem 1rem; position:relative; }
@@ -264,7 +369,9 @@ CSS = """
     .step-body  { font-size:.8rem; color:var(--tx-3); margin-top:.3rem; line-height:1.5; }
     .step-connector { position:absolute; top:2.3rem; left:calc(50% + 18px); right:calc(-50% + 18px); height:2px; background:var(--g300); z-index:1; }
 
-    /* ── STAGE HEADER ── */
+    /* ================================
+       STAGE HEADER
+    ================================ */
     .stage-header {
         background: linear-gradient(90deg, var(--g800), var(--g600));
         color: #fff;
@@ -278,7 +385,9 @@ CSS = """
         box-shadow: var(--shadow-s);
     }
 
-    /* ── BREED CARDS ── */
+    /* ================================
+       BREED CARDS
+    ================================ */
     .breed-card-wrap {
         background: var(--surface);
         border-radius: var(--r);
@@ -292,7 +401,9 @@ CSS = """
     .breed-card-wrap:hover { background: var(--surface-2); box-shadow: var(--shadow-m); }
     .breed-card-wrap * { color: #000000 !important; }
 
-    /* ── ALERT BANNERS ── */
+    /* ================================
+       ALERT BANNERS
+    ================================ */
     .alert-amber {
         background: var(--amber-light);
         border-left: 4px solid var(--amber);
@@ -311,50 +422,14 @@ CSS = """
         font-size: .9rem;
         color: var(--g800);
     }
-    [data-theme="dark"] .alert-amber { background: rgba(217,119,6,.15);  color: #fcd34d; border-left-color: var(--amber); }
-    [data-theme="dark"] .alert-green { background: rgba(40,164,98,.14);  color: var(--g300); border-left-color: var(--g400); }
+    [data-theme="dark"] .alert-amber { background: rgba(217,119,6,.15); color: #fcd34d; border-left-color: var(--amber); }
+    [data-theme="dark"] .alert-green { background: rgba(40,164,98,.14); color: var(--g300); border-left-color: var(--g400); }
 
     hr { border-color: var(--border-s) !important; margin: 1.5rem 0 !important; }
 
-    /* ── SIDEBAR ── */
-    [data-testid="stSidebar"] { background: var(--surface) !important; border-right: 1px solid var(--border-s) !important; }
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] .stMarkdown { color: var(--tx-2) !important; }
-    [data-testid="stSidebar"] [data-testid="stMetricValue"] { color: var(--tx) !important; font-size:1.1rem !important; }
-    [data-testid="stSidebar"] [data-testid="stMetricLabel"] { color: var(--tx-3) !important; }
-    [data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,[data-testid="stSidebar"] h4 { color: var(--tx) !important; }
-
-    /* ── METRICS ── */
-    [data-testid="metric-container"] {
-        background: var(--surface) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: var(--r) !important;
-        padding: .9rem 1rem !important;
-        box-shadow: var(--shadow-s) !important;
-    }
-    [data-testid="stMetricLabel"] {
-        font-size: .76rem !important;
-        font-weight: 600 !important;
-        color: var(--tx-3) !important;
-        text-transform: uppercase !important;
-        letter-spacing: .04em !important;
-        white-space: normal !important;
-    }
-    [data-testid="stMetricValue"] {
-        font-family: 'DM Serif Display', serif !important;
-        font-size: 1.5rem !important;
-        color: var(--tx) !important;
-        white-space: normal !important;
-        overflow: visible !important;
-        line-height: 1.2 !important;
-    }
-    [data-testid="stMetricDelta"] { font-size: .8rem !important; }
-
-    /* ── TABS ── */
+    /* ================================
+       TABS
+    ================================ */
     .stTabs [role="tablist"] {
         background: var(--surface);
         border-radius: 10px;
@@ -393,34 +468,23 @@ CSS = """
     .stTabs [data-baseweb="tab-panel"] h3,
     .stTabs [data-baseweb="tab-panel"] h4  { color: var(--tx) !important; }
 
-    /* ── FORM INPUTS ── */
-    .stSelectbox label, .stSlider label, .stNumberInput label,
-    .stTextInput label, .stCheckbox label {
-        font-size: .88rem !important;
-        font-weight: 500 !important;
-        color: var(--tx-2) !important;
-    }
-    [data-baseweb="select"] span,
-    [data-baseweb="input"] input,
-    input[type="number"],
-    input[type="text"] { color: var(--tx) !important; }
-    [data-baseweb="select"] > div {
-        background: var(--surface) !important;
-        border-color: var(--border-s) !important;
-        color: var(--tx) !important;
-    }
-
-    /* ── EXPANDER ── */
+    /* ================================
+       EXPANDER
+    ================================ */
     [data-testid="stExpander"] { background: var(--surface) !important; border: 1px solid var(--border) !important; border-radius: var(--r-sm) !important; }
     [data-testid="stExpander"] summary { font-weight:600 !important; font-size:.9rem !important; color:var(--g700) !important; }
     [data-theme="dark"] [data-testid="stExpander"] summary { color: var(--g400) !important; }
 
-    /* ── DATA TABLE ── */
+    /* ================================
+       DATA TABLE
+    ================================ */
     [data-testid="stDataFrame"] { border-radius: var(--r-sm) !important; overflow: hidden !important; border: 1px solid var(--border-s) !important; }
     [data-testid="stDataFrame"] th { background: var(--surface-3) !important; color: var(--tx-2) !important; font-weight:600 !important; font-size:.81rem !important; text-transform:uppercase !important; letter-spacing:.04em !important; padding:.6rem .8rem !important; }
     [data-testid="stDataFrame"] td { color: var(--tx) !important; font-size:.88rem !important; padding:.5rem .8rem !important; white-space:normal !important; }
 
-    /* ── ALERTS ── */
+    /* ================================
+       STREAMLIT ALERTS
+    ================================ */
     [data-testid="stSuccess"] { background: var(--g50) !important; border-left: 4px solid var(--g500) !important; color: var(--g800) !important; border-radius: var(--r-sm) !important; }
     [data-testid="stInfo"]    { background: #eff6ff !important; border-left: 4px solid #3b82f6 !important; color: #1e3a5f !important; border-radius: var(--r-sm) !important; }
     [data-testid="stWarning"] { background: var(--amber-light) !important; border-left: 4px solid var(--amber) !important; color: #451a03 !important; border-radius: var(--r-sm) !important; }
@@ -429,10 +493,11 @@ CSS = """
     [data-theme="dark"] [data-testid="stInfo"]    { background: rgba(59,130,246,.14) !important; color: #bfdbfe !important; }
     [data-theme="dark"] [data-testid="stWarning"] { background: rgba(217,119,6,.15)  !important; color: #fcd34d !important; }
     [data-theme="dark"] [data-testid="stError"]   { background: rgba(220,38,38,.14)  !important; color: #fca5a5 !important; }
-
     [data-testid="stCaptionContainer"] p { color: var(--tx-3) !important; font-size: .8rem !important; }
 
-    /* ── NUTRIENT PANEL ── */
+    /* ================================
+       NUTRIENT PANEL
+    ================================ */
     .nutrient-panel {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -454,7 +519,9 @@ CSS = """
     }
     [data-theme="dark"] .nutrient-panel-title { color: var(--g400); }
 
-    /* ── NUTRIENT CHIPS ── */
+    /* ================================
+       NUTRIENT CHIPS
+    ================================ */
     .nutrient-chip {
         text-align: center;
         padding: .55rem .4rem;
@@ -469,7 +536,9 @@ CSS = """
     [data-theme="dark"] .nutrient-chip-label { color: var(--tx-3); }
     [data-theme="dark"] .nutrient-chip-value { color: var(--g400); }
 
-    /* ── BREED BADGE ── */
+    /* ================================
+       BREED BADGE
+    ================================ */
     .breed-badge {
         display: inline-flex;
         align-items: center;
@@ -485,7 +554,9 @@ CSS = """
     }
     [data-theme="dark"] .breed-badge { background: rgba(40,164,98,.18); color: var(--g300); border-color: rgba(69,196,124,.3); }
 
-    /* ── FOOTER ── */
+    /* ================================
+       FOOTER
+    ================================ */
     .footer-wrap {
         background: var(--g900);
         color: rgba(255,255,255,.6);
@@ -501,7 +572,9 @@ CSS = """
     .footer-badges { display:flex; gap:.5rem; }
     .badge { padding:.25rem .75rem; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:20px; font-size:.71rem; color:rgba(255,255,255,.65); }
 
-    /* ── RESPONSIVE ── */
+    /* ================================
+       RESPONSIVE
+    ================================ */
     @media (max-width:768px) {
         [data-testid="column"] { width:100% !important; flex:1 1 100% !important; }
         .stButton > button { width:100% !important; font-size:.88rem !important; }

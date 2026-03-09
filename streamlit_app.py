@@ -290,20 +290,7 @@ CSS = """
         transition: box-shadow .2s, background .2s;
     }
     .breed-card-wrap:hover { background: var(--surface-2); box-shadow: var(--shadow-m); }
-
-    /* Breed name heading — must override Streamlit's default black */
-    .breed-card-wrap h1,
-    .breed-card-wrap h2,
-    .breed-card-wrap h3,
-    .breed-card-wrap h4,
-    .breed-card-wrap [data-testid="stMarkdownContainer"] h3,
-    .breed-card-wrap [data-testid="stMarkdownContainer"] h2 {
-        color: var(--tx) !important;
-    }
-    /* Body text — only target prose paragraphs, not metric/widget wrappers */
-    .breed-card-wrap [data-testid="stMarkdownContainer"] p {
-        color: var(--tx-2) !important;
-    }
+    .breed-card-wrap * { color: #000000 !important; }
 
     /* ── ALERT BANNERS ── */
     .alert-amber {
